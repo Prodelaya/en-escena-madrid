@@ -54,12 +54,7 @@ namespace EnEscenaMadrid.Controllers
             using var reader = new StringReader(xmlContent);
             
             // Convertimos el XML a objetos C# y lo devolvemos
-            return (MadridSalasResponse)serializer.Deserialize(reader);
-        }
-
-        private MadridSalasResponse? ObtenerRespuesta()
-        {
-            // Lógica para obtener la respuesta
+            return (MadridSalasResponse)serializer.Deserialize(reader)!;
         }
     }
 }

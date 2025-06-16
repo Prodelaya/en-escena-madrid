@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.AspNetCore.Identity.UI.UIFrameworkAttribute("Bootstrap5")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("EnEscenaMadrid")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1e599afd39ac890612be923af594a897876d07fa")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fb78ede6cff5f4fa516c345843852325e3469aa0")]
 [assembly: System.Reflection.AssemblyProductAttribute("EnEscenaMadrid")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EnEscenaMadrid")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
