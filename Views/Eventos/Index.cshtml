@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Eventos de Teatro - En Escena Madrid";
+}
+
+<div class="container">
+    <h1>🎭 Eventos de Teatro en Madrid</h1>
+    
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Error
+        </div>
+    }
+    
+    @if (ViewBag.JsonResponse != null)
+    {
+        <div class="alert alert-success">
+            <h3>¡Conexión exitosa con Ticketmaster!</h3>
+            <p>Datos recibidos:</p>
+            <pre style="background: #f5f5f5; padding: 10px; overflow-x: auto;">@ViewBag.JsonResponse</pre>
+        </div>
+    }
+</div>

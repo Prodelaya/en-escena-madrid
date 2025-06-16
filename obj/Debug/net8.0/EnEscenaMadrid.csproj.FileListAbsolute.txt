@@ -28,3 +28,4 @@
 /opt/en-escena-madrid/EnEscenaMadrid/obj/Debug/net8.0/EnEscenaMadrid.pdb
 /opt/en-escena-madrid/EnEscenaMadrid/obj/Debug/net8.0/EnEscenaMadrid.genruntimeconfig.cache
 /opt/en-escena-madrid/EnEscenaMadrid/obj/Debug/net8.0/ref/EnEscenaMadrid.dll
+/opt/en-escena-madrid/EnEscenaMadrid/obj/Debug/net8.0/EnEscenaMadrid.sourcelink.json

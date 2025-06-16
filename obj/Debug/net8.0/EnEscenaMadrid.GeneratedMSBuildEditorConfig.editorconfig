@@ -18,6 +18,10 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = /opt/en-escena-madrid/EnEscenaMadrid
 build_property._RazorSourceGeneratorDebug = 
 
+[/opt/en-escena-madrid/EnEscenaMadrid/Views/Eventos/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXZlbnRvcy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/opt/en-escena-madrid/EnEscenaMadrid/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
