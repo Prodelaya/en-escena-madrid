@@ -1,5 +1,12 @@
+/* Variables para colores de teatro */
+:root {
+  --teatro-rojo: #B91C1C;
+  --teatro-dorado: #D4AF37;
+  --dorado-suave: #FDF6E3;
+}
+
 html {
-  font-size: 14px;
+  front-size: 14px;
 }
 
 @media (min-width: 768px) {
@@ -7,16 +14,19 @@ html {
     font-size: 16px;
   }
 }
-
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
-
 html {
   position: relative;
   min-height: 100%;
 }
-
 body {
   margin-bottom: 60px;
+}
+
+/* Mejorar body para móvil */
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--dorado-suave);
 }

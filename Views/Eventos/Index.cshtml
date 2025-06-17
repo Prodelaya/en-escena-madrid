@@ -1,209 +1,100 @@
-<!-- SUSTITUYE todo tu código actual por esto -->
+@model List<EnEscenaMadrid.Models.Evento>
 @{
-    ViewData["Title"] = "Eventos de Teatro - En Escena Madrid";
+    ViewData["Title"] = "En Escena Madrid - Eventos Culturales";
 }
 
+<!-- HEADER PRINCIPAL -->
+<header class="app-header">
+    <h1 class="app-title">🎭 EN ESCENA MADRID</h1>
+    <p class="app-tagline">Todo el teatro en un click</p>
+</header>
+
 <div class="container">
-    <h1>🎭 Eventos de Teatro en Madrid</h1>
-    
-    <!-- DEBUG: Verificar qué datos tenemos -->
-    <div style="background: #f0f0f0; padding: 15px; margin: 10px 0;">
-        <h3>🔍 DEBUG - Información de datos:</h3>
-        <p><strong>Tipo de Model:</strong> @(Model?.GetType().Name ?? "Ninguno")</p>
-        <p><strong>¿Model es null?:</strong> @(Model == null ? "SÍ" : "NO")</p>
-        
-        @if (Model != null)
-        {
-            <p><strong>Datos disponibles:</strong> Hay información</p>
-        }
+    <!-- NAVEGACIÓN PRINCIPAL -->
+    <nav class="main-nav">
+        <div class="nav-tabs">
+            <a href="/Eventos" class="nav-tab active">🎭 TEATRO</a>
+            <a href="/Eventos/Categoria/cine" class="nav-tab">🎬 CINE</a>
+            <a href="/Eventos/Categoria/exposiciones" class="nav-tab">🎨 EXPOSICIONES</a>
+            <a href="/Eventos/Categoria/literatura" class="nav-tab">📚 LITERATURA</a>
+            <a href="/Eventos/Categoria/musica" class="nav-tab">🎵 MÚSICA</a>
+            <a href="/Eventos/Categoria/festivales" class="nav-tab">🎉 FESTIVALES</a>
+            <a href="/Eventos/Categoria/infantil" class="nav-tab">👶 INFANTIL</a>
+        </div>
+    </nav>
+
+    <!-- INFORMACIÓN DEBUG -->
+    <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 6px; margin: 20px 0;">
+        <h3>📊 Estadísticas</h3>
+        <p><strong>Total eventos encontrados:</strong> @Model.Count</p>
+        <p><strong>Categoría actual:</strong> @(ViewBag.CategoriaActual ?? "Todas")</p>
     </div>
 
-    <!-- PRIMERA SALA - Sin variables intermedias -->
-    <div style="background: #e3f2fd; padding: 15px; margin: 10px 0;">
-        <h3>📋 PRIMERA SALA - Estructura de datos:</h3>
-        
-        @if (Model?.Contenidos != null && Model.Contenidos.Count > 0)
+    <!-- LISTA DE EVENTOS -->
+    <main class="theaters-grid">
+        @if (Model != null && Model.Count > 0)
         {
-            <p><strong>Total salas encontradas:</strong> @Model.Contenidos.Count</p>
-            
-            <h4>🎭 Datos de la primera sala:</h4>
-            <p><strong>Tipo:</strong> @(Model.Contenidos[0].Tipo ?? "Sin tipo")</p>
-            
-            @if (Model.Contenidos[0].Atributos?.ListaAtributos != null)
+            @foreach (var evento in Model.Take(10))
             {
-                <p><strong>Número de atributos:</strong> @Model.Contenidos[0].Atributos.ListaAtributos.Count</p>
-                
-                <h5>📝 TODOS los atributos de la primera sala:</h5>
-                @for (int i = 0; i < Model.Contenidos[0].Atributos.ListaAtributos.Count; i++)
-                {
-                    var atributo = Model.Contenidos[0].Atributos.ListaAtributos[i];
-                    <p>• <strong>@(atributo.Nombre ?? "Sin nombre"):</strong> 
-                    @(string.IsNullOrEmpty(atributo.Valor) ? "[Vacío]" : 
-                        atributo.Valor.Length > 100 ? atributo.Valor.Substring(0, 100) + "..." : atributo.Valor)
-                    </p>
-                }
+                <article class="theater-card">
+                    <h2 class="theater-title">@evento.Titulo</h2>
+                    
+                    <div class="theater-info">
+                        <span class="theater-info-label">📅 Fecha:</span>
+                        @evento.FechaEvento.ToString("dd/MM/yyyy") a las @evento.HoraEvento
+                    </div>
+                    
+                    <div class="theater-info">
+                        <span class="theater-info-label">📍 Lugar:</span>
+                        @evento.NombreInstalacion
+                    </div>
+                    
+                    <div class="theater-info">
+                        <span class="theater-info-label">🏛️ Dirección:</span>
+                        @evento.DireccionCompleta
+                        @if (evento.Latitud.HasValue && evento.Longitud.HasValue)
+                        {
+                            <text> </text>
+                            <a href="https://www.google.com/maps?q=@evento.Latitud,@evento.Longitud" 
+                               target="_blank" class="theater-link">
+                                (mapa)
+                            </a>
+                        }
+                    </div>
+                    
+                    <div class="theater-info">
+                        <span class="theater-info-label">💰 Precio:</span>
+                        @(evento.EsGratuito ? "Gratuito" : "Consultar precio")
+                    </div>
+                    
+                    <div class="theater-info">
+                        <span class="theater-info-label">🎭 Tipo:</span>
+                        @evento.Tipo
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(evento.ContentUrl))
+                    {
+                        <div class="theater-info mt-md">
+                            <a href="@evento.ContentUrl" target="_blank" class="theater-link">
+                                🌐 Más información
+                            </a>
+                        </div>
+                    }
+                </article>
             }
         }
         else
         {
-            <p>❌ No hay contenidos en la respuesta</p>
-        }
-    </div>
-    
-    @if (ViewBag.Error != null)
-    {
-        <div class="alert alert-danger">
-            @ViewBag.Error
-        </div>
-    }
-
-<!-- CARDS DE SALAS CON INFORMACIÓN COMPLETA -->
-<div style="background: #f9f9f9; padding: 15px; margin: 10px 0;">
-    <h3>🎭 TODAS LAS SALAS DE MADRID:</h3>
-    
-    @if (Model?.Contenidos != null)
-    {
-        @for (int i = 0; i < Model.Contenidos.Count; i++)
-        {
-            <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #B8283A; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                @{
-                    // Obtener la lista de atributos
-                    var listaAtributos = Model.Contenidos[i].Atributos?.ListaAtributos as IEnumerable<dynamic>;
-                    
-                    // Buscar atributos principales
-                    var nombreAtributo = listaAtributos?.FirstOrDefault((Func<dynamic, bool>)(a => a.Nombre == "NOMBRE"));
-                    var transporteAtributo = listaAtributos?.FirstOrDefault((Func<dynamic, bool>)(a => a.Nombre == "TRANSPORTE"));
-                    var equipamientoAtributo = listaAtributos?.FirstOrDefault((Func<dynamic, bool>)(a => a.Nombre == "EQUIPAMIENTO"));
-                    var urlAtributo = listaAtributos?.FirstOrDefault((Func<dynamic, bool>)(a => a.Nombre == "CONTENT-URL"));
-                    var localizacionAtributo = listaAtributos?.FirstOrDefault((Func<dynamic, bool>)(a => a.Nombre == "LOCALIZACION"));
-
-                    // Variables para construir
-                    var nombreSala = nombreAtributo?.Valor ?? $"Sala {i + 1}";
-                    var transporte = transporteAtributo?.Valor ?? "Información no disponible";
-                    var equipamiento = equipamientoAtributo?.Valor ?? "Información no disponible";
-                    var urlSitio = urlAtributo?.Valor;
-                    
-                    // Construir dirección y enlace a Google Maps
-                    var direccionCompleta = "Dirección no disponible";
-                    var googleMapsUrl = "";
-                    
-                    if (localizacionAtributo?.SubAtributos != null)
-                    {
-                        var subAtributos = (IEnumerable<dynamic>)localizacionAtributo.SubAtributos;
-                        
-                        // Extraer componentes de dirección
-                        var claseVial = subAtributos.FirstOrDefault(s => s.Nombre == "CLASE-VIAL")?.Valor ?? "";
-                        var nombreVia = subAtributos.FirstOrDefault(s => s.Nombre == "NOMBRE-VIA")?.Valor ?? "";
-                        var numero = subAtributos.FirstOrDefault(s => s.Nombre == "NUM")?.Valor ?? "";
-                        var codigoPostal = subAtributos.FirstOrDefault(s => s.Nombre == "CODIGO-POSTAL")?.Valor ?? "";
-                        var localidad = subAtributos.FirstOrDefault(s => s.Nombre == "LOCALIDAD")?.Valor ?? "";
-                        
-                        // Extraer coordenadas para Google Maps
-                        var latitud = subAtributos.FirstOrDefault(s => s.Nombre == "LATITUD")?.Valor ?? "";
-                        var longitud = subAtributos.FirstOrDefault(s => s.Nombre == "LONGITUD")?.Valor ?? "";
-                        
-                        // Construir dirección completa
-                        if (!string.IsNullOrEmpty(claseVial) && !string.IsNullOrEmpty(nombreVia))
-                        {
-                            direccionCompleta = $"{claseVial} {nombreVia}";
-                            if (!string.IsNullOrEmpty(numero))
-                                direccionCompleta += $", {numero}";
-                            if (!string.IsNullOrEmpty(codigoPostal))
-                                direccionCompleta += $" {codigoPostal}";
-                            if (!string.IsNullOrEmpty(localidad))
-                                direccionCompleta += $" {localidad}";
-                        }
-                        
-                        // Crear enlace de Google Maps
-                        if (!string.IsNullOrEmpty(latitud) && !string.IsNullOrEmpty(longitud))
-                        {
-                            googleMapsUrl = $"https://www.google.com/maps?q={latitud},{longitud}";
-                        }
-                    }
-                }
-                
-                <!-- Contenido de la tarjeta -->
-                <h4 style="color: #B8283A; margin-bottom: 10px;">🎭 @nombreSala</h4>
-                
-                <p style="margin: 5px 0;">
-                    <strong>📍 Dirección:</strong> @direccionCompleta
-                    @if (!string.IsNullOrEmpty(googleMapsUrl))
-                    {
-                        <text> </text>
-                        <a href="@googleMapsUrl" target="_blank" style="color: #B8283A; text-decoration: none; font-weight: 500;">
-                            (mapa)
-                        </a>
-                    }
-                </p>
-                
-                <p style="margin: 5px 0;"><strong>🚇 Transporte:</strong> @transporte</p>
-                
-               <div style="margin: 5px 0;">
-                    <strong>🏛️ Equipamiento/Aforo:</strong>
-                    <div style="margin-left: 20px; font-size: 0.9em; color: #555; margin-top: 5px;">
-                        @{
-                            var equipamientoId = $"equip_{i}"; // ID único para cada card
-                            var equipamientoCorto = equipamiento;
-                            var tieneTextoLargo = equipamiento.Length > 250;
-                            
-                            if (tieneTextoLargo)
-                            {
-                                equipamientoCorto = equipamiento.Substring(0, 250);
-                            }
-                        }
-                        
-                        <!-- Texto corto siempre visible -->
-                        <span id="@(equipamientoId)_corto">
-                            @equipamientoCorto
-                            @if (tieneTextoLargo)
-                            {
-                                <text>... </text>
-                                <a href="javascript:void(0)" 
-                                onclick="mostrarCompleto('@equipamientoId')" 
-                                style="color: #B8283A; text-decoration: none; font-weight: 500;">
-                                    ver más
-                                </a>
-                            }
-                        </span>
-                        
-                        <!-- Texto completo oculto inicialmente -->
-                        @if (tieneTextoLargo)
-                        {
-                            <span id="@(equipamientoId)_completo" style="display: none;">
-                                @equipamiento
-                                <text> </text>
-                                <a href="javascript:void(0)" 
-                                onclick="ocultarCompleto('@equipamientoId')" 
-                                style="color: #B8283A; text-decoration: none; font-weight: 500;">
-                                    ver menos
-                                </a>
-                            </span>
-                        }
-                    </div>
-                </div>
-
-                @if (!string.IsNullOrEmpty(urlSitio))
+            <div class="theater-card text-center">
+                <h2 class="theater-title">❌ No hay eventos disponibles</h2>
+                <p>No se pudieron cargar los eventos.</p>
+                @if (ViewBag.Error != null)
                 {
-                    <p style="margin: 10px 0;">
-                        <strong>🌐 Web:</strong> 
-                        <a href="@urlSitio" target="_blank" style="color: #B8283A; text-decoration: none; font-weight: 500;">
-                            Sitio web oficial
-                        </a>
+                    <p style="color: var(--teatro-rojo); margin-top: 1rem;">
+                        <strong>Error:</strong> @ViewBag.Error
                     </p>
                 }
             </div>
         }
-    }
-</div>
-<script>
-function mostrarCompleto(id) {
-    document.getElementById(id + '_corto').style.display = 'none';
-    document.getElementById(id + '_completo').style.display = 'inline';
-}
-
-function ocultarCompleto(id) {
-    document.getElementById(id + '_corto').style.display = 'inline';
-    document.getElementById(id + '_completo').style.display = 'none';
-}
-</script>
+    </main>
 </div>
