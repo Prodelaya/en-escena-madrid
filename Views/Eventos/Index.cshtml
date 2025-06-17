@@ -13,13 +13,14 @@
     <!-- NAVEGACIÓN PRINCIPAL -->
     <nav class="main-nav">
         <div class="nav-tabs">
-            <a href="/Eventos" class="nav-tab active">🎭 TEATRO</a>
-            <a href="/Eventos/Categoria/cine" class="nav-tab">🎬 CINE</a>
-            <a href="/Eventos/Categoria/exposiciones" class="nav-tab">🎨 EXPOSICIONES</a>
-            <a href="/Eventos/Categoria/literatura" class="nav-tab">📚 LITERATURA</a>
-            <a href="/Eventos/Categoria/musica" class="nav-tab">🎵 MÚSICA</a>
-            <a href="/Eventos/Categoria/festivales" class="nav-tab">🎉 FESTIVALES</a>
-            <a href="/Eventos/Categoria/infantil" class="nav-tab">👶 INFANTIL</a>
+            <a href="/Eventos" class="nav-tab active">📅 ESTA SEMANA</a>
+            <a href="/Eventos?categoria=teatro" class="nav-tab">🎭 TEATRO</a>
+            <a href="/Eventos?categoria=cine" class="nav-tab">🎬 CINE</a>
+            <a href="/Eventos?categoria=exposiciones" class="nav-tab">🎨 EXPOSICIONES</a>
+            <a href="/Eventos?categoria=literatura" class="nav-tab">📚 LITERATURA</a>
+            <a href="/Eventos?categoria=musica" class="nav-tab">🎵 MÚSICA</a>
+            <a href="/Eventos?categoria=festivales" class="nav-tab">🎉 FESTIVALES</a>
+            <a href="/Eventos?categoria=infantil" class="nav-tab">👶 INFANTIL</a>
         </div>
     </nav>
 
@@ -31,7 +32,50 @@
     </div>
 
     <!-- LISTA DE EVENTOS -->
-    <main class="theaters-grid">
+<main class="theaters-grid">
+    @if (ViewBag.TipoVista == "Netflix")
+    {
+        <!-- VISTA NETFLIX: Por categorías -->
+        @if (ViewBag.EventosPorCategoria != null)
+        {
+            @foreach (var categoria in (Dictionary<string, List<EnEscenaMadrid.Models.Evento>>)ViewBag.EventosPorCategoria)
+            {
+                <section class="netflix-category">
+                    <h2 class="category-title">@categoria.Key ESTA SEMANA</h2>
+                    
+                    <div class="netflix-row">
+                        @foreach (var evento in categoria.Value)
+                        {
+                            <article class="netflix-card">
+                                <div class="netflix-card-content">
+                                    <h3 class="netflix-title">@evento.Titulo</h3>
+                                    <div class="netflix-info">
+                                        <span class="netflix-time">@evento.FechaFormateada</span>
+                                        <span class="netflix-place">📍 @evento.NombreInstalacion</span>
+                                        <span class="netflix-price">💰 @evento.Precio</span>
+                                        @if (evento.NecesitaEntrada)
+                                        {
+                                            <span class="netflix-ticket">🎫 Entrada necesaria</span>
+                                        }
+                                    </div>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                </section>
+            }
+        }
+        else
+        {
+            <div class="theater-card text-center">
+                <h2 class="theater-title">📅 No hay eventos esta semana</h2>
+                <p>Vuelve pronto para ver próximos eventos.</p>
+            </div>
+        }
+    }
+    else
+    {
+        <!-- VISTA TRADICIONAL: Lista de eventos (para pestañas) -->
         @if (Model != null && Model.Count > 0)
         {
             @foreach (var evento in Model.Take(10))
@@ -64,8 +108,29 @@
                     
                     <div class="theater-info">
                         <span class="theater-info-label">💰 Precio:</span>
-                        @(evento.EsGratuito ? "Gratuito" : "Consultar precio")
+                        @evento.Precio
+                        @if (evento.NecesitaEntrada)
+                        {
+                            <text> | 🎫 Entrada necesaria</text>
+                        }
                     </div>
+
+                    <div class="theater-info">
+                        <span class="theater-info-label">📅 Fecha inteligente:</span>
+                        @evento.FechaFormateada
+                    </div>
+
+                    @if (evento.EsEventoLargaDuracion)
+                    {
+                        <div class="theater-info">
+                            <span class="theater-info-label">⏳ Tipo:</span>
+                            Evento de larga duración
+                            @if (!string.IsNullOrEmpty(evento.DiasSemana))
+                            {
+                                <text> - Días: @evento.DiasSemana</text>
+                            }
+                        </div>
+                    }
                     
                     <div class="theater-info">
                         <span class="theater-info-label">🎭 Tipo:</span>
@@ -96,5 +161,6 @@
                 }
             </div>
         }
-    </main>
+    }
+</main>
 </div>
