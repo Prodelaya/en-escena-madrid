@@ -1,0 +1,92 @@
+@model Dictionary<string, List<EnEscenaMadrid.Models.Evento>>
+
+@*
+    Vista parcial para mostrar eventos agrupados por categorías (landing Netflix)
+    Se usa en peticiones AJAX para actualizar contenido sin recargar página
+*@
+
+<div class="eventos-netflix">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var categoria in Model)
+        {
+            <div class="categoria-seccion">
+                <h2 class="categoria-titulo">@categoria.Key</h2>
+                
+                <div class="eventos-carousel">
+                    @foreach (var evento in categoria.Value)
+                    {
+                        <div class="evento-card-netflix">
+                            <div class="evento-imagen">
+                                <!-- Placeholder para imagen - futuro web scraping -->
+                                <div class="imagen-placeholder">
+                                    @{
+                                        var icono = categoria.Key switch
+                                        {
+                                            "🎭 TEATRO" => "🎭",
+                                            "🎬 CINE" => "🎬", 
+                                            "🎨 EXPOSICIONES" => "🎨",
+                                            "📚 LITERATURA" => "📚",
+                                            "🎵 MÚSICA" => "🎵",
+                                            "🎉 FESTIVALES" => "🎉",
+                                            _ => "🎪"
+                                        };
+                                    }
+                                    <span class="icono-categoria">@icono</span>
+                                </div>
+                            </div>
+                            
+                            <div class="evento-contenido">
+                                <h4 class="evento-titulo-netflix">@evento.Titulo</h4>
+                                <p class="evento-fecha-netflix">@evento.FechaFormateada</p>
+                                
+                                <div class="evento-meta">
+                                    <span class="evento-ubicacion-netflix">
+                                        📍 @evento.NombreInstalacion
+                                    </span>
+                                    
+                                    <span class="evento-precio-netflix">
+                                        @if (evento.EsGratuito)
+                                        {
+                                            <span class="gratuito">🆓 Gratuito</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="pago">💰 @evento.Precio</span>
+                                        }
+                                    </span>
+                                </div>
+                                
+                                @if (!string.IsNullOrEmpty(evento.ContentUrl))
+                                {
+                                    <div class="evento-accion">
+                                        <a href="@evento.ContentUrl" target="_blank" class="btn-netflix">Ver detalles</a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        
+        <div class="total-netflix">
+            <p class="stats-netflix">
+                @{
+                    var totalEventos = Model.Values.SelectMany(lista => lista).Count();
+                }
+                Mostrando @totalEventos eventos en @Model.Count categorías
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="no-eventos-netflix">
+            <div class="mensaje-vacio">
+                <h3>🔍 No hay eventos disponibles</h3>
+                <p>No se encontraron eventos con los filtros seleccionados.</p>
+                <p>Intenta ajustar los filtros para descubrir más eventos culturales.</p>
+            </div>
+        </div>
+    }
+</div>

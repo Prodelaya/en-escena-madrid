@@ -1,0 +1,68 @@
+@model List<EnEscenaMadrid.Models.Evento>
+
+@*
+    Vista parcial para mostrar lista de eventos (pestañas)
+    Se usa en peticiones AJAX para actualizar contenido sin recargar página
+*@
+
+<div class="eventos-lista">
+    @if (Model != null && Model.Any())
+    {
+        <div class="eventos-grid">
+            @foreach (var evento in Model)
+            {
+                <div class="evento-card">
+                    <div class="evento-header">
+                        <h3 class="evento-titulo">@evento.Titulo</h3>
+                        <span class="evento-fecha">@evento.FechaFormateada</span>
+                    </div>
+                    
+                    <div class="evento-info">
+                        <p class="evento-ubicacion">
+                            <i class="icon-location"></i>
+                            @evento.NombreInstalacion
+                            @if (!string.IsNullOrEmpty(evento.Distrito))
+                            {
+                                <span class="distrito">(@evento.Distrito)</span>
+                            }
+                        </p>
+                        
+                        <p class="evento-precio">
+                            @if (evento.EsGratuito)
+                            {
+                                <span class="precio-gratuito">🆓 Gratuito</span>
+                            }
+                            else
+                            {
+                                <span class="precio-pago">💰 @evento.Precio</span>
+                            }
+                        </p>
+                        
+                        @if (!string.IsNullOrEmpty(evento.Descripcion))
+                        {
+                            <p class="evento-descripcion">@evento.Descripcion.Substring(0, Math.Min(150, evento.Descripcion.Length))...</p>
+                        }
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(evento.ContentUrl))
+                    {
+                        <div class="evento-acciones">
+                            <a href="@evento.ContentUrl" target="_blank" class="btn-info">Más información</a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        
+        <div class="total-eventos">
+            <p>Mostrando @Model.Count eventos</p>
+        </div>
+    }
+    else
+    {
+        <div class="no-eventos">
+            <p>No se encontraron eventos con los filtros seleccionados.</p>
+            <p>Intenta ajustar los filtros para ver más resultados.</p>
+        </div>
+    }
+</div>
