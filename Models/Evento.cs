@@ -17,5 +17,16 @@ namespace EnEscenaMadrid.Models
         public string? Descripcion { get; set; }
         public double? Latitud { get; set; }
         public double? Longitud { get; set; }
+        // === NUEVOS CAMPOS PARA PRECIOS Y ENTRADAS ===
+        public string? Precio { get; set; }
+        public bool NecesitaEntrada { get; set; }
+
+        // === NUEVOS CAMPOS PARA EVENTOS DE LARGA DURACIÓN ===
+        public bool EsEventoLargaDuracion { get; set; }
+        public string? DiasSemana { get; set; }
+        public DateTime? FechaFin { get; set; }
+
+        // === CAMPO HELPER PARA MOSTRAR FECHAS BONITAS ===
+        public string FechaFormateada { get; set; } = string.Empty;
     }
 }
