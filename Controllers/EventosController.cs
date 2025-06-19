@@ -128,7 +128,7 @@ namespace EnEscenaMadrid.Controllers
 
                 // PASO 4: Configurar ViewBag y devolver vista parcial
                 ConfigurarViewBagParaAjax(fecha, eventosProcesados.Count);
-                return PartialView("_EventosLista", eventosProcesados);
+                return PartialView("_EventosCards", eventosProcesados);
             }
             catch (Exception ex)
             {
@@ -784,5 +784,52 @@ namespace EnEscenaMadrid.Controllers
         }
 
         #endregion
+    /// <summary>
+/// MÉTODO TEMPORAL PARA ANÁLISIS - Eliminar después de usar
+/// Analiza todos los tipos de eventos en la API para tomar decisiones
+/// </summary>
+[HttpGet]
+public async Task<IActionResult> AnalizarTiposEventos()
+{
+    try
+    {
+        // Obtener eventos de la API
+        var eventosResponse = await ObtenerEventosDeMadrid();
+        var eventosProcesados = ProcesarEventos(eventosResponse);
+        
+        // Agrupar por tipo y contar
+        var analisisTipos = eventosProcesados
+            .GroupBy(e => e.Tipo)
+            .Select(g => new { 
+                Tipo = g.Key, 
+                Cantidad = g.Count(),
+                EjemploTitulo = g.First().Titulo 
+            })
+            .OrderByDescending(x => x.Cantidad)
+            .ToList();
+        
+        // Crear HTML para mostrar resultados
+        var html = "<h2>📊 Análisis de Tipos de Eventos en la API</h2>";
+        html += "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+        html += "<tr style='background: #f0f0f0;'><th>Tipo</th><th>Cantidad</th><th>Ejemplo</th></tr>";
+        
+        foreach (var item in analisisTipos)
+        {
+            html += $"<tr>";
+            html += $"<td style='padding: 8px;'>{item.Tipo}</td>";
+            html += $"<td style='padding: 8px; text-align: center;'><strong>{item.Cantidad}</strong></td>";
+            html += $"<td style='padding: 8px;'>{item.EjemploTitulo}</td>";
+            html += $"</tr>";
+        }
+        
+        html += "</table>";
+        html += $"<p><strong>Total eventos analizados:</strong> {eventosProcesados.Count}</p>";
+        
+        return Content(html, "text/html");
+    }
+    catch (Exception ex)
+    {
+        return Content($"Error: {ex.Message}", "text/plain");
     }
 }
+}}

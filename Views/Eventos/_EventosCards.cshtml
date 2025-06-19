@@ -1,0 +1,99 @@
+@model List<EnEscenaMadrid.Models.Evento>
+
+<!-- ✅ AÑADIR ESTE CONTENEDOR PRINCIPAL -->
+<div class="eventos-lista">
+    <div class="categoria-header">
+        <h2 class="categoria-titulo">🎭 @ViewBag.CategoriaActual</h2>
+        @if (ViewBag.TotalEventos > 0)
+        {
+            <p class="categoria-subtitle">@ViewBag.TotalEventos eventos encontrados</p>
+        }
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="eventos-grid">
+            @foreach (var evento in Model)
+            {
+                <div class="evento-card">
+                    <!-- Todo el contenido de la card igual que tienes -->
+                    <div class="evento-card-header">
+                        <h3 class="evento-titulo">@evento.Titulo</h3>
+                    </div>
+                    
+                    <div class="evento-card-body">
+                        <!-- Fecha -->
+                        <div class="evento-fecha">
+                            @if (evento.FechaFormateada.Contains("HOY"))
+                            {
+                                <span>🔥</span>
+                            }
+                            else if (evento.FechaFormateada.Contains("MAÑANA"))
+                            {
+                                <span>📅</span>
+                            }
+                            else
+                            {
+                                <span>📅</span>
+                            }
+                            <span>@evento.FechaFormateada</span>
+                        </div>
+                        
+                        <!-- Ubicación -->
+                        <div class="evento-ubicacion">
+                            <span>📍</span>
+                            <span>
+                                <strong>@evento.NombreInstalacion</strong><br>
+                                @evento.DireccionCompleta
+                                @if (!string.IsNullOrEmpty(evento.Distrito))
+                                {
+                                    <span class="text-muted">(@evento.Distrito)</span>
+                                }
+                            </span>
+                        </div>
+                        
+                        <!-- Precio -->
+                        @if (evento.EsGratuito)
+                        {
+                            <span class="evento-precio">
+                                <span>🆓</span> Gratuito
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="evento-precio" style="color: #dc3545;">
+                                <span>💰</span> @evento.Precio
+                            </span>
+                        }
+                    </div>
+                    
+                    <!-- Footer de la card -->
+                    <div class="evento-card-footer">
+                        @if (!string.IsNullOrEmpty(evento.ContentUrl))
+                        {
+                            <a href="@evento.ContentUrl" target="_blank" class="evento-enlace">
+                                Ver detalles →
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Más información próximamente</span>
+                        }
+                        
+                        <!-- ESPACIO PARA BOTÓN FAVORITOS FUTURO -->
+                        <div class="evento-acciones">
+                            <!-- Aquí irán los botones de favoritos -->
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-eventos">
+            <p>😔 No se encontraron eventos para los filtros seleccionados.</p>
+            <p>Prueba cambiando los filtros o consulta más tarde.</p>
+        </div>
+    }
+</div> <!-- ✅ CERRAR EL CONTENEDOR PRINCIPAL -->

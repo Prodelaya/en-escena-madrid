@@ -2,90 +2,163 @@
 
 @*
     Vista parcial para mostrar eventos agrupados por categorías (landing Netflix)
-    Se usa en peticiones AJAX para actualizar contenido sin recargar página
+    Versión actualizada con cards modernas y diseño responsive
 *@
 
 <div class="eventos-netflix">
+    <!-- Header principal del landing -->
+    <div class="netflix-hero">
+        <h1 class="hero-title">🎭 Eventos Culturales de Madrid</h1>
+        <p class="hero-subtitle">Esta semana en la capital • @DateTime.Now.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES"))</p>
+    </div>
+
     @if (Model != null && Model.Any())
     {
         @foreach (var categoria in Model)
         {
             <div class="categoria-seccion">
-                <h2 class="categoria-titulo">@categoria.Key</h2>
+                <!-- Header de sección mejorado -->
+                <div class="seccion-header">
+                    <h2 class="categoria-titulo">@categoria.Key</h2>
+                    <span class="eventos-count">@categoria.Value.Count evento@(categoria.Value.Count != 1 ? "s" : "")</span>
+                </div>
                 
+                <!-- Container de scroll horizontal -->
                 <div class="eventos-carousel">
-                    @foreach (var evento in categoria.Value)
-                    {
-                        <div class="evento-card-netflix">
-                            <div class="evento-imagen">
-                                <!-- Placeholder para imagen - futuro web scraping -->
-                                <div class="imagen-placeholder">
-                                    @{
-                                        var icono = categoria.Key switch
-                                        {
-                                            "🎭 TEATRO" => "🎭",
-                                            "🎬 CINE" => "🎬", 
-                                            "🎨 EXPOSICIONES" => "🎨",
-                                            "📚 LITERATURA" => "📚",
-                                            "🎵 MÚSICA" => "🎵",
-                                            "🎉 FESTIVALES" => "🎉",
-                                            _ => "🎪"
-                                        };
-                                    }
-                                    <span class="icono-categoria">@icono</span>
-                                </div>
-                            </div>
-                            
-                            <div class="evento-contenido">
-                                <h4 class="evento-titulo-netflix">@evento.Titulo</h4>
-                                <p class="evento-fecha-netflix">@evento.FechaFormateada</p>
-                                
-                                <div class="evento-meta">
-                                    <span class="evento-ubicacion-netflix">
-                                        📍 @evento.NombreInstalacion
-                                    </span>
+                    <div class="carousel-track">
+                        @foreach (var evento in categoria.Value.Take(12))
+                        {
+                            <div class="evento-card-netflix">
+                                <!-- Imagen/placeholder con hover effect -->
+                                <div class="evento-imagen">
+                                    <div class="imagen-placeholder">
+                                        @{
+                                            var icono = categoria.Key switch
+                                            {
+                                                var key when key.Contains("TEATRO") => "🎭",
+                                                var key when key.Contains("CINE") => "🎬", 
+                                                var key when key.Contains("EXPOSICIONES") => "🎨",
+                                                var key when key.Contains("LITERATURA") => "📚",
+                                                var key when key.Contains("MÚSICA") => "🎵",
+                                                var key when key.Contains("DANZA") => "💃",
+                                                var key when key.Contains("INFANTIL") => "👶",
+                                                var key when key.Contains("FESTIVALES") => "🎉",
+                                                _ => "🎪"
+                                            };
+                                        }
+                                        <span class="icono-categoria">@icono</span>
+                                    </div>
                                     
-                                    <span class="evento-precio-netflix">
+                                    <!-- Badge de fecha destacada -->
+                                    <div class="fecha-badge">
+                                        @if (evento.FechaFormateada.Contains("HOY"))
+                                        {
+                                            <span class="badge-hoy">HOY</span>
+                                        }
+                                        else if (evento.FechaFormateada.Contains("MAÑANA"))
+                                        {
+                                            <span class="badge-manana">MAÑANA</span>
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <!-- Contenido de la card -->
+                                <div class="evento-contenido">
+                                    <h4 class="evento-titulo-netflix">@evento.Titulo</h4>
+                                    
+                                    <!-- Fecha formateada -->
+                                    <div class="evento-fecha-netflix">
+                                        <span class="fecha-icon">📅</span>
+                                        <span>@evento.FechaFormateada</span>
+                                    </div>
+                                    
+                                    <!-- Ubicación -->
+                                    <div class="evento-ubicacion-netflix">
+                                        <span class="ubicacion-icon">📍</span>
+                                        <div class="ubicacion-texto">
+                                            <div class="instalacion">@evento.NombreInstalacion</div>
+                                            <div class="distrito">@evento.Distrito</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Precio -->
+                                    <div class="evento-precio-netflix">
                                         @if (evento.EsGratuito)
                                         {
-                                            <span class="gratuito">🆓 Gratuito</span>
+                                            <span class="precio-gratuito">🆓 Gratuito</span>
                                         }
                                         else
                                         {
-                                            <span class="pago">💰 @evento.Precio</span>
+                                            <span class="precio-pago">💰 @evento.Precio</span>
                                         }
-                                    </span>
+                                    </div>
                                 </div>
                                 
-                                @if (!string.IsNullOrEmpty(evento.ContentUrl))
-                                {
-                                    <div class="evento-accion">
-                                        <a href="@evento.ContentUrl" target="_blank" class="btn-netflix">Ver detalles</a>
+                                <!-- Footer con acciones -->
+                                <div class="evento-footer">
+                                    @if (!string.IsNullOrEmpty(evento.ContentUrl))
+                                    {
+                                        <a href="@evento.ContentUrl" target="_blank" class="btn-netflix">
+                                            <span>ℹ️</span> Ver detalles
+                                        </a>
+                                    }
+                                    
+                                    <!-- Placeholder para botón de favoritos -->
+                                    <div class="btn-favorito-futuro">
+                                        <span>❤️</span>
                                     </div>
-                                }
+                                </div>
                             </div>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
+                
+                <!-- Indicador si hay más eventos -->
+                @if (categoria.Value.Count > 12)
+                {
+                    <div class="mas-eventos">
+                        <span class="mas-eventos-texto">Y @(categoria.Value.Count - 12) eventos más en esta categoría</span>
+                        <a href="/Eventos?categoria=@categoria.Key.ToLower().Split(' ')[1]" class="ver-categoria-completa">
+                            Ver todos los @categoria.Key.Split(' ')[1].ToLower() →
+                        </a>
+                    </div>
+                }
             </div>
         }
         
+        <!-- Footer con estadísticas -->
         <div class="total-netflix">
-            <p class="stats-netflix">
+            <div class="stats-container">
                 @{
                     var totalEventos = Model.Values.SelectMany(lista => lista).Count();
+                    var totalMostrados = Model.Values.SelectMany(lista => lista.Take(12)).Count();
                 }
-                Mostrando @totalEventos eventos en @Model.Count categorías
-            </p>
+                <div class="stats-principales">
+                    <div class="stat-item">
+                        <span class="stat-numero">@totalMostrados</span>
+                        <span class="stat-label">Eventos destacados</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-numero">@Model.Count</span>
+                        <span class="stat-label">Categorías</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-numero">@totalEventos</span>
+                        <span class="stat-label">Total disponibles</span>
+                    </div>
+                </div>
+            </div>
         </div>
     }
     else
     {
         <div class="no-eventos-netflix">
             <div class="mensaje-vacio">
-                <h3>🔍 No hay eventos disponibles</h3>
+                <div class="icono-vacio">🔍</div>
+                <h3>No hay eventos disponibles</h3>
                 <p>No se encontraron eventos con los filtros seleccionados.</p>
                 <p>Intenta ajustar los filtros para descubrir más eventos culturales.</p>
+                <button onclick="location.reload()" class="btn-reload">🔄 Recargar eventos</button>
             </div>
         </div>
     }

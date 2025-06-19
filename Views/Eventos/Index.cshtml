@@ -13,7 +13,16 @@
 <!-- ========================================== -->
 <header class="app-header-fixed">
     <div class="header-container">
+        <!-- BOTÓN FILTROS INTEGRADO -->
+        <button id="abrirMenu" class="btn-filtros-integrado" title="Abrir filtros de eventos">
+            <span class="filtros-icon">≡</span>
+            <span class="filtros-text">Filtros</span>
+        </button>
+        
+        <!-- TÍTULO -->
         <h1 class="app-title">🎭 EN ESCENA MADRID</h1>
+        
+        <!-- SECCIÓN USUARIO -->
         <div class="user-section">
             <a href="/mi-dashboard" class="user-btn">
                 <span class="user-icon">👤</span>
@@ -40,12 +49,12 @@
                 <h2>📋 Todos los Eventos Culturales de Madrid</h2>
                 <p>Listado completo de @Model.Count eventos culturales disponibles</p>
             </div>
-            @await Html.PartialAsync("_EventosLista", Model)
+            @await Html.PartialAsync("_EventosCards", Model)
         }
         else
         {
             <!-- Vista Lista: Pestaña específica -->
-            @await Html.PartialAsync("_EventosLista", Model)
+            @await Html.PartialAsync("_EventosCards", Model)
         }
     </div>
 
@@ -176,6 +185,7 @@
                             <label><input type="checkbox" value="exposiciones"> 🎨 Exposiciones</label>
                             <label><input type="checkbox" value="literatura"> 📚 Literatura</label>
                             <label><input type="checkbox" value="musica"> 🎵 Música</label>
+                            <label><input type="checkbox" value="danza"> 💃 Danza</label>
                             <label><input type="checkbox" value="festivales"> 🎉 Festivales</label>
                             <label><input type="checkbox" value="infantil"> 👶 Infantil</label>
                         </div>
@@ -616,27 +626,40 @@ function obtenerFiltrosSeleccionados() {
     };
 }
 
-// === FUNCIÓN PARA APLICAR FILTROS VIA AJAX ===
+// ✅ FUNCIÓN CORREGIDA
 function aplicarFiltros() {
     const filtros = obtenerFiltrosSeleccionados();
     
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoriaActual = urlParams.get('categoria');
-    
     mostrarCargando();
     
+    // ✅ CREAR URL con parámetros correctos que espera el controlador
     const params = new URLSearchParams();
-    if (categoriaActual) params.append('categoria', categoriaActual);
-    if (filtros.precio) params.append('precio', filtros.precio);
-    if (filtros.distritos) params.append('distritos', filtros.distritos);
-    if (filtros.tipos) params.append('tipos', filtros.tipos);
+    
+    // Enviar fecha (hoy, semana, todos)
+    if (filtros.fecha) params.append('fecha', filtros.fecha);
+    
+    // Enviar precio si no es "todos"
+    if (filtros.precio && filtros.precio !== 'todos') {
+        params.append('precio', filtros.precio);
+    }
+    
+    // Enviar categorías si hay seleccionadas
+    if (filtros.categorias) {
+        params.append('categorias', filtros.categorias);
+    }
+    
+    // Enviar distritos si hay seleccionados
+    if (filtros.distritos) {
+        params.append('distritos', filtros.distritos);
+    }
     
     const url = `/Eventos/FiltrarEventosAjax?${params.toString()}`;
+    console.log('🔍 URL de filtros:', url); // Para debug
     
     fetch(url)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor');
+                throw new Error(`Error HTTP: ${response.status}`);
             }
             return response.text();
         })
@@ -644,10 +667,11 @@ function aplicarFiltros() {
             actualizarContenido(html);
             cerrarMenu();
             ocultarCargando();
+            console.log('✅ Filtros aplicados correctamente');
         })
         .catch(error => {
-            console.error('Error aplicando filtros:', error);
-            alert('Error al aplicar filtros. Por favor, inténtalo de nuevo.');
+            console.error('❌ Error aplicando filtros:', error);
+            alert('Error al aplicar filtros. Revisa la consola para más detalles.');
             ocultarCargando();
         });
 }

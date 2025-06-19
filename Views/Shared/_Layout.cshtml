@@ -1,35 +1,47 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - EnEscenaMadrid</title>
+    <title>@ViewData["Title"] - En Escena Madrid</title>
+    
+    <!-- Bootstrap para utilidades CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    
+    <!-- Tus estilos personalizados -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/EnEscenaMadrid.styles.css" asp-append-version="true" />
+    
+    <!-- PWA Meta tags para futuro -->
+    <meta name="theme-color" content="#B91C1C" />
+    <meta name="description" content="Todos los eventos culturales de Madrid en un solo lugar" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <!-- BOTÓN FILTROS A LA IZQUIERDA -->
-                <button id="abrirMenu" class="btn-filtros-navbar">
-                    <span>≡</span> Filtros
-                </button>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    <!-- ========================================== -->
+    <!-- CONTENIDO PRINCIPAL -->
+    <!-- ========================================== -->
+    <main role="main">
+        @RenderBody()
+    </main>
 
-    <footer class="border-top footer text-muted">
+    <!-- ========================================== -->
+    <!-- FOOTER MINIMALISTA -->
+    <!-- ========================================== -->
+    <footer class="footer-personalizado">
         <div class="container">
-            &copy; 2025 - EnEscenaMadrid - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="footer-content">
+                <span>&copy; 2025 En Escena Madrid</span>
+                <span class="footer-links">
+                    <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
+                    <a href="mailto:contacto@enescenamadrid.es">Contacto</a>
+                </span>
+            </div>
         </div>
     </footer>
+
+    <!-- ========================================== -->
+    <!-- SCRIPTS ESENCIALES -->
+    <!-- ========================================== -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
