@@ -46,3 +46,74 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+
+/* === ESTILOS PARA NAVBAR PERSONALIZADO === */
+
+/* BOTÓN FILTROS EN NAVBAR */
+.btn-filtros-navbar {
+    background: #B91C1C; /* Rojo teatro */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-right: 20px;
+}
+
+.btn-filtros-navbar:hover {
+    background: #a91717;
+    transform: scale(1.05);
+}
+
+/* NAVEGACIÓN HORIZONTAL EN NAVBAR */
+.navbar-nav-horizontal {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.nav-link-custom {
+    padding: 8px 12px;
+    background: #f8f9fa;
+    color: #333;
+    text-decoration: none;
+    border-radius: 15px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.nav-link-custom:hover {
+    background: #B91C1C;
+    color: white;
+    text-decoration: none;
+}
+
+.nav-link-custom.active {
+    background: #B91C1C;
+    color: white;
+}
+
+/* RESPONSIVE PARA NAVEGACIÓN */
+@media (max-width: 768px) {
+    .navbar-nav-horizontal {
+        gap: 5px;
+    }
+    
+    .nav-link-custom {
+        font-size: 0.75rem;
+        padding: 6px 10px;
+    }
+    
+    .btn-filtros-navbar {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        margin-right: 10px;
+    }
+}

@@ -3,125 +3,30 @@
     ViewData["Title"] = "En Escena Madrid - Eventos Culturales la capital";
 }
 
-<!-- NUEVO: Menú Hamburguesa para Filtros -->
+<!-- ========================================== -->
+<!-- OVERLAY PARA MENÚ MODAL -->
+<!-- ========================================== -->
 <div id="overlay" class="overlay"></div>
 
-<div id="menuFiltros" class="menu-filtros">
-    <div class="menu-header">
-        <h3>🔍 Filtrar Eventos</h3>
-        <button id="cerrarMenu" class="btn-cerrar">&times;</button>
-    </div>
-
-    <!-- NUEVA SECCIÓN: Navegación en el menú -->
-    <div class="menu-navegacion">
-        <h4>📍 Ir a sección</h4>
-        <div class="nav-opciones">
-            <a href="/Eventos" class="nav-opcion">📅 ESTA SEMANA</a>
-            <a href="/Eventos?categoria=teatro" class="nav-opcion">🎭 TEATRO</a>
-            <a href="/Eventos?categoria=cine" class="nav-opcion">🎬 CINE</a>
-            <a href="/Eventos?categoria=exposiciones" class="nav-opcion">🎨 EXPOSICIONES</a>
-            <a href="/Eventos?categoria=literatura" class="nav-opcion">📚 LITERATURA</a>
-            <a href="/Eventos?categoria=musica" class="nav-opcion">🎵 MÚSICA</a>
-            <a href="/Eventos?categoria=festivales" class="nav-opcion">🎉 FESTIVALES</a>
-            <a href="/Eventos?categoria=infantil" class="nav-opcion">👶 INFANTIL</a>
+<!-- ========================================== -->
+<!-- HEADER FIJO SUPERIOR -->
+<!-- ========================================== -->
+<header class="app-header-fixed">
+    <div class="header-container">
+        <h1 class="app-title">🎭 EN ESCENA MADRID</h1>
+        <div class="user-section">
+            <a href="/mi-dashboard" class="user-btn">
+                <span class="user-icon">👤</span>
+                <span class="user-text">Mi Dashboard</span>
+            </a>
         </div>
     </div>
-
-    <div class="menu-contenido">
-    <!-- SECCIÓN COLAPSIBLE DE FILTROS -->
-    <div class="filtros-colapsible">
-        <div class="filtros-header" onclick="toggleFiltros()">
-            <h4>🔍 Filtrar Eventos</h4>
-            <span class="filtros-toggle" id="filtrosToggle">▼</span>
-        </div>
-        
-        <div class="filtros-contenido" id="filtrosContenido">
-            <!-- Filtro de Precio (Global) -->
-            <div class="filtro-seccion">
-                <h4>💰 Precio</h4>
-                <div class="filtro-opciones">
-                    <label><input type="radio" name="precio" value="todos" checked> Todos</label>
-
-                    <label><input type="radio" name="precio" value="gratuito"> 🆓 Gratuitos</label>
-                    <label><input type="radio" name="precio" value="pago"> 💰 De pago</label>
-                </div>
-            </div>
-            
-            <!-- Filtro de Distritos (Global) -->
-            <div class="filtro-seccion">
-                <h4>📍 Distritos</h4>
-                <div class="filtro-opciones" id="filtroDistritos">
-                    <label><input type="checkbox" value="Arganzuela"> Arganzuela</label>
-                    <label><input type="checkbox" value="Barajas"> Barajas</label>
-                    <label><input type="checkbox" value="Carabanchel"> Carabanchel</label>
-                    <label><input type="checkbox" value="Centro"> Centro</label>
-                    <label><input type="checkbox" value="Chamberí"> Chamberí</label>
-                    <label><input type="checkbox" value="Ciudad Lineal"> Ciudad Lineal</label>
-                    <label><input type="checkbox" value="Fuencarral-El Pardo"> Fuencarral-El Pardo</label>
-                    <label><input type="checkbox" value="Hortaleza"> Hortaleza</label>
-                    <label><input type="checkbox" value="Latina"> Latina</label>
-                    <label><input type="checkbox" value="Moncloa"> Moncloa</label>
-                    <label><input type="checkbox" value="Moncloa-Aravaca"> Moncloa-Aravaca</label>
-                    <label><input type="checkbox" value="Moratalaz"> Moratalaz</label>
-                    <label><input type="checkbox" value="Puente de Vallecas"> Puente de Vallecas</label>
-                    <label><input type="checkbox" value="Retiro"> Retiro</label>
-                    <label><input type="checkbox" value="Salamanca"> Salamanca</label>
-                    <label><input type="checkbox" value="San Blas-Canillejas"> San Blas-Canillejas</label>
-                    <label><input type="checkbox" value="Tetuán"> Tetuán</label>
-                    <label><input type="checkbox" value="Usera"> Usera</label>
-                    <label><input type="checkbox" value="Vicálvaro"> Vicálvaro</label>
-                    <label><input type="checkbox" value="Villa de Vallecas"> Villa de Vallecas</label>
-                    <label><input type="checkbox" value="Villaverde"> Villaverde</label>
-                </div>
-            </div>
-            
-            <!-- Filtro de Tipos (Solo en Landing "Esta semana") -->
-            <div class="filtro-seccion" id="filtroTiposSeccion" style="display: none;">
-                <h4>🎭 Tipos de Eventos</h4>
-                <div class="filtro-opciones" id="filtroTipos">
-                    <!-- Se llenarán dinámicamente según la categoría -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Botones de Acción -->
-    <div class="menu-acciones">
-        <button id="aplicarFiltros" class="btn-aplicar">Aplicar Filtros</button>
-        <button id="limpiarFiltros" class="btn-limpiar">Limpiar Todo</button>
-    </div>
-</div>
-</div>
-<!-- Botón Hamburguesa -->
-<button id="abrirMenu" class="btn-hamburguesa">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
-
-<!-- HEADER PRINCIPAL -->
-<header class="app-header">
-    <h1 class="app-title">🎭 EN ESCENA MADRID</h1>
-    <p class="app-tagline">Todo el teatro en un click</p>
 </header>
 
-<div class="container">
-    <!-- NAVEGACIÓN PRINCIPAL -->
-    <nav class="main-nav">
-        <div class="nav-tabs">
-            <a href="/Eventos" class="nav-tab active">📅 ESTA SEMANA</a>
-            <a href="/Eventos?categoria=teatro" class="nav-tab">🎭 TEATRO</a>
-            <a href="/Eventos?categoria=cine" class="nav-tab">🎬 CINE</a>
-            <a href="/Eventos?categoria=exposiciones" class="nav-tab">🎨 EXPOSICIONES</a>
-            <a href="/Eventos?categoria=literatura" class="nav-tab">📚 LITERATURA</a>
-            <a href="/Eventos?categoria=musica" class="nav-tab">🎵 MÚSICA</a>
-            <a href="/Eventos?categoria=festivales" class="nav-tab">🎉 FESTIVALES</a>
-            <a href="/Eventos?categoria=infantil" class="nav-tab">👶 INFANTIL</a>
-            <a href="/Eventos?mostrarTodos=true" class="nav-tab">📋 TODOS LOS EVENTOS</a>
-        </div>
-    </nav>
-
-    <!-- CONTENEDOR PRINCIPAL - IMPORTANTE: Este ID es lo que busca el JavaScript -->
+<!-- ========================================== -->
+<!-- CONTENEDOR PRINCIPAL DE EVENTOS -->
+<!-- ========================================== -->
+<main class="container">
     <div id="contenido-eventos" class="contenido-principal">
         @if (ViewBag.TipoVista == "Netflix")
         {
@@ -144,51 +49,219 @@
         }
     </div>
 
-    <!-- Información de errores -->
+    <!-- ========================================== -->
+    <!-- MENSAJE DE ERROR (SI EXISTE) -->
+    <!-- ========================================== -->
     @if (ViewBag.Error != null)
     {
-        <div class="error-mensaje" style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 6px; margin: 20px 0;">
+        <div class="error-mensaje">
             <p>⚠️ <strong>Error:</strong> @ViewBag.Error</p>
         </div>
     }
+</main>
+
+<!-- ========================================== -->
+<!-- MENÚ LATERAL DE FILTROS -->
+<!-- ========================================== -->
+<div id="menuFiltros" class="menu-filtros">
+    <!-- Header del menú -->
+    <div class="menu-header">
+        <h3>🔍 Filtrar Eventos</h3>
+        <button id="cerrarMenu" class="btn-cerrar">&times;</button>
     </div>
+
+    <!-- Contenido del menú -->
+    <div class="menu-contenido">
+        
+        <!-- SECCIÓN COLAPSIBLE DE FILTROS -->
+        <div class="filtros-colapsible">
+            <div class="filtros-header" onclick="toggleFiltros()">
+                <h4>🔍 Filtrar Eventos</h4>
+                <span class="filtros-toggle" id="filtrosToggle">▼</span>
+            </div>
+            
+            <div class="filtros-contenido" id="filtrosContenido">
+                
+                <!-- Filtro de Fecha -->
+                <div class="filtro-seccion">
+                    <h4>📅 Fecha</h4>
+                    
+                    <button type="button" class="filtro-desplegable-btn" onclick="toggleFechas()">
+                        <span>Seleccionar período</span>
+                        <span class="filtro-arrow" id="fechasArrow">▼</span>
+                    </button>
+                    
+                    <div class="filtro-desplegable-content" id="fechasContent">
+                        <div class="filtro-opciones">
+                            <label><input type="radio" name="fecha" value="hoy"> 🔥 Hoy</label>
+                            <label><input type="radio" name="fecha" value="semana" checked> 📅 Esta semana</label>
+                            <label><input type="radio" name="fecha" value="todos"> 📋 Cualquier fecha</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtro de Precio - Desplegable con radio buttons -->
+                <div class="filtro-seccion">
+                    <h4>💰 Precio</h4>
+                    
+                    <!-- Botón para abrir/cerrar -->
+                    <button type="button" class="filtro-desplegable-btn" onclick="togglePrecios()">
+                        <span>Seleccionar precio</span>
+                        <span class="filtro-arrow" id="preciosArrow">▼</span>
+                    </button>
+                    
+                    <!-- Lista de radio buttons -->
+                    <div class="filtro-desplegable-content" id="preciosContent">
+                        <div class="filtro-opciones">
+                            <label><input type="radio" name="precio" value="todos" checked> Todos</label>
+                            <label><input type="radio" name="precio" value="gratuito"> 🆓 Gratuitos</label>
+                            <label><input type="radio" name="precio" value="pago"> 💰 De pago</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filtro de Distritos - Desplegable con checkboxes -->
+                <div class="filtro-seccion">
+                    <h4>📍 Distritos</h4>
+                    
+                    <!-- Botón para abrir/cerrar -->
+                    <button type="button" class="filtro-desplegable-btn" onclick="toggleDistritos()">
+                        <span>Seleccionar distritos</span>
+                        <span class="filtro-arrow" id="distritosArrow">▼</span>
+                    </button>
+                    
+                    <!-- Lista de checkboxes (inicialmente oculta) -->
+                    <div class="filtro-desplegable-content" id="distritosContent">
+                        <div class="filtro-opciones" id="filtroDistritos">
+                            <label><input type="checkbox" value="Arganzuela"> Arganzuela</label>
+                            <label><input type="checkbox" value="Barajas"> Barajas</label>
+                            <label><input type="checkbox" value="Carabanchel"> Carabanchel</label>
+                            <label><input type="checkbox" value="Centro"> Centro</label>
+                            <label><input type="checkbox" value="Chamartín"> Chamartín</label>
+                            <label><input type="checkbox" value="Chamberí"> Chamberí</label>
+                            <label><input type="checkbox" value="Ciudad Lineal"> Ciudad Lineal</label>
+                            <label><input type="checkbox" value="Fuencarral-El Pardo"> Fuencarral-El Pardo</label>
+                            <label><input type="checkbox" value="Hortaleza"> Hortaleza</label>
+                            <label><input type="checkbox" value="Latina"> Latina</label>
+                            <label><input type="checkbox" value="Moncloa-Aravaca"> Moncloa-Aravaca</label>
+                            <label><input type="checkbox" value="Moratalaz"> Moratalaz</label>
+                            <label><input type="checkbox" value="Puente de Vallecas"> Puente de Vallecas</label>
+                            <label><input type="checkbox" value="Retiro"> Retiro</label>
+                            <label><input type="checkbox" value="Salamanca"> Salamanca</label>
+                            <label><input type="checkbox" value="San Blas-Canillejas"> San Blas-Canillejas</label>
+                            <label><input type="checkbox" value="Tetuán"> Tetuán</label>
+                            <label><input type="checkbox" value="Usera"> Usera</label>
+                            <label><input type="checkbox" value="Vicálvaro"> Vicálvaro</label>
+                            <label><input type="checkbox" value="Villa de Vallecas"> Villa de Vallecas</label>
+                            <label><input type="checkbox" value="Villaverde"> Villaverde</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filtro de Categorías (Solo en Esta semana y Todos los eventos) -->
+                <div class="filtro-seccion" id="filtroCategoriasSeccion">
+                    <h4>🎭 Categorías</h4>
+                    
+                    <!-- Botón para abrir/cerrar -->
+                    <button type="button" class="filtro-desplegable-btn" onclick="toggleCategorias()">
+                        <span>Seleccionar categorías</span>
+                        <span class="filtro-arrow" id="categoriasArrow">▼</span>
+                    </button>
+                    
+                    <!-- Lista de checkboxes -->
+                    <div class="filtro-desplegable-content" id="categoriasContent">
+                        <div class="filtro-opciones" id="filtroCategorias">
+                            <label><input type="checkbox" value="teatro"> 🎭 Teatro</label>
+                            <label><input type="checkbox" value="cine"> 🎬 Cine</label>
+                            <label><input type="checkbox" value="exposiciones"> 🎨 Exposiciones</label>
+                            <label><input type="checkbox" value="literatura"> 📚 Literatura</label>
+                            <label><input type="checkbox" value="musica"> 🎵 Música</label>
+                            <label><input type="checkbox" value="festivales"> 🎉 Festivales</label>
+                            <label><input type="checkbox" value="infantil"> 👶 Infantil</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="menu-acciones">
+            <button id="aplicarFiltros" class="btn-aplicar">Aplicar Filtros</button>
+            <button id="limpiarFiltros" class="btn-limpiar">Limpiar Todo</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- CSS ESTILOS -->
+<!-- ========================================== -->
 <style>
-/* === BOTÓN HAMBURGUESA === */
-.btn-hamburguesa {
+/* HEADER FIJO */
+.app-header-fixed {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1001;
-    background: #d32f2f;
-    border: none;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: white;
+    border-bottom: 2px solid var(--teatro-rojo);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-container {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+    padding: 15px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.app-title {
+    color: var(--teatro-rojo);
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+}
+
+.user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--teatro-rojo);
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-weight: 500;
     transition: all 0.3s ease;
 }
 
-.btn-hamburguesa:hover {
-    background: #b71c1c;
-    transform: scale(1.1);
+.user-btn:hover {
+    background: #a91717;
+    transform: translateY(-1px);
 }
 
-.btn-hamburguesa span {
-    display: block;
-    width: 20px;
-    height: 2px;
-    background: white;
-    margin: 2px 0;
-    transition: 0.3s;
-    border-radius: 1px;
+
+/* CONTENEDOR PRINCIPAL */
+body {
+    padding-top: 80px;
 }
 
-/* === OVERLAY === */
+.container {
+    padding-top: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* OVERLAY */
 .overlay {
     display: none;
     position: fixed;
@@ -205,25 +278,24 @@
     display: block;
 }
 
-/* === MENÚ LATERAL === */
+/* MENÚ LATERAL */
 .menu-filtros {
     position: fixed;
     top: 0;
-    right: -350px; /* Oculto inicialmente */
+    left: -350px; /* CAMBIO: Desde la izquierda */
     width: 350px;
     height: 100%;
     background: white;
     z-index: 1003;
-    transition: right 0.3s ease;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+    transition: left 0.3s ease; /* CAMBIO: Animación left */
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15); /* CAMBIO: Sombra hacia la derecha */
     overflow-y: auto;
 }
 
 .menu-filtros.activo {
-    right: 0; /* Se desliza hacia la vista */
+    left: 0; /* CAMBIO: Se desliza desde la izquierda */
 }
 
-/* === HEADER DEL MENÚ === */
 .menu-header {
     background: #d32f2f;
     color: white;
@@ -255,50 +327,11 @@
     opacity: 0.7;
 }
 
-/* === CONTENIDO DEL MENÚ === */
 .menu-contenido {
     padding: 20px;
 }
 
-/* === NUEVO: NAVEGACIÓN EN MENÚ === */
-.menu-navegacion {
-    margin-bottom: 25px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-.menu-navegacion h4 {
-    margin: 0 0 15px 0;
-    color: #d32f2f;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-.nav-opciones {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.nav-opcion {
-    display: block;
-    padding: 12px 15px;
-    background: #f8f9fa;
-    color: #333;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    border-left: 4px solid transparent;
-}
-
-.nav-opcion:hover {
-    background: #e9ecef;
-    border-left-color: #d32f2f;
-    transform: translateX(3px);
-}
-
-/* === NUEVO: FILTROS COLAPSIBLES === */
+/* FILTROS COLAPSIBLES */
 .filtros-colapsible {
     margin-bottom: 20px;
 }
@@ -338,7 +371,6 @@
     transform: rotate(180deg);
 }
 
-/* Contenido de filtros - inicialmente oculto */
 .filtros-contenido {
     max-height: 0;
     overflow: hidden;
@@ -347,10 +379,41 @@
 }
 
 .filtros-contenido.expandido {
-    max-height: 1000px; /* Altura suficiente para todos los filtros */
+    max-height: 1200px;
     padding: 15px;
 }
-/* === BOTONES DE ACCIÓN === */
+
+.filtro-seccion {
+    margin-bottom: 20px;
+}
+
+.filtro-seccion h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.filtro-opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filtro-opciones label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.filtro-opciones label:hover {
+    background: #f8f9fa;
+}
+
+/* BOTONES DE ACCIÓN */
 .menu-acciones {
     margin-top: 30px;
     display: flex;
@@ -387,21 +450,96 @@
     background: #5a6268;
 }
 
-/* === RESPONSIVE === */
+/* ERROR MESSAGE */
+.error-mensaje {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 20px 0;
+}
+
+/* RESPONSIVE */
 @@media (max-width: 768px) {
     .menu-filtros {
         width: 100%;
-        right: -100%;
+        left: -100%; /* CAMBIO: Desde la izquierda en móvil también */
     }
     
-    .btn-hamburguesa {
-        top: 15px;
-        right: 15px;
-        width: 45px;
-        height: 45px;
+    .btn-filtros-hamburguesa {
+        top: 95px;
+        left: 15px;
+        padding: 10px 12px;
+    }
+    
+    .hamburguesa-icon {
+        font-size: 1.2rem;
+    }
+    
+    .filtros-text {
+        font-size: 0.9rem;
+    }
+    
+    .nav-tabs {
+        padding: 10px 15px;
+    }
+    
+    .nav-tab {
+        font-size: 0.8rem;
+        padding: 8px 12px;
     }
 }
+/* DESPLEGABLE PERSONALIZADO */
+.filtro-desplegable-btn {
+    width: 100%;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.filtro-desplegable-btn:hover {
+    background: #e9ecef;
+    border-color: var(--teatro-rojo);
+}
+
+.filtro-arrow {
+    transition: transform 0.3s ease;
+    font-weight: bold;
+    color: var(--teatro-rojo);
+}
+
+.filtro-arrow.rotado {
+    transform: rotate(180deg);
+}
+
+.filtro-desplegable-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: white;
+    border: 0px solid #e9ecef;
+    border-radius: 0 0 6px 6px;
+    margin-top: 2px;
+}
+
+.filtro-desplegable-content.expandido {
+    max-height: 250px; /* Altura para scroll interno */
+    border-width: 2px;
+    padding: 10px;
+    overflow-y: auto;
+}
 </style>
+
+<!-- ========================================== -->
+<!-- JAVASCRIPT -->
+<!-- ========================================== -->
 <script>
 // === VARIABLES GLOBALES ===
 let menuActivo = false;
@@ -417,14 +555,14 @@ function abrirMenu() {
     menuActivo = true;
     overlay.classList.add('activo');
     menuFiltros.classList.add('activo');
-    document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+    document.body.style.overflow = 'hidden';
 }
 
 function cerrarMenu() {
     menuActivo = false;
     overlay.classList.remove('activo');
     menuFiltros.classList.remove('activo');
-    document.body.style.overflow = 'auto'; // Restaurar scroll del body
+    document.body.style.overflow = 'auto';
 }
 
 // === EVENT LISTENERS PARA MENÚ ===
@@ -439,23 +577,42 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+// === FUNCIÓN TOGGLE FILTROS COLAPSIBLES ===
+function toggleFiltros() {
+    const filtrosContenido = document.getElementById('filtrosContenido');
+    const filtrosToggle = document.getElementById('filtrosToggle');
+    
+    filtrosContenido.classList.toggle('expandido');
+    filtrosToggle.classList.toggle('rotado');
+    
+    if (filtrosContenido.classList.contains('expandido')) {
+        filtrosToggle.textContent = '▲';
+    } else {
+        filtrosToggle.textContent = '▼';
+    }
+}
+
 // === FUNCIÓN PARA RECOGER FILTROS SELECCIONADOS ===
 function obtenerFiltrosSeleccionados() {
-    // Obtener precio seleccionado (radio buttons)
+    // Obtener fecha seleccionada
+    const fechaSeleccionada = document.querySelector('input[name="fecha"]:checked')?.value || 'semana';
+    
+    // Obtener precio seleccionado
     const precioSeleccionado = document.querySelector('input[name="precio"]:checked')?.value || 'todos';
     
-    // Obtener distritos seleccionados (checkboxes)
+    // Obtener categorías seleccionadas
+    const categoriasCheckboxes = document.querySelectorAll('#filtroCategorias input[type="checkbox"]:checked');
+    const categoriasSeleccionadas = Array.from(categoriasCheckboxes).map(cb => cb.value);
+    
+    // Obtener distritos seleccionados
     const distritosCheckboxes = document.querySelectorAll('#filtroDistritos input[type="checkbox"]:checked');
     const distritosSeleccionados = Array.from(distritosCheckboxes).map(cb => cb.value);
     
-    // Obtener tipos seleccionados (checkboxes) - solo si están visibles
-    const tiposCheckboxes = document.querySelectorAll('#filtroTipos input[type="checkbox"]:checked');
-    const tiposSeleccionados = Array.from(tiposCheckboxes).map(cb => cb.value);
-    
     return {
+        fecha: fechaSeleccionada,
+        categorias: categoriasSeleccionadas.length > 0 ? categoriasSeleccionadas.join(',') : null,
         precio: precioSeleccionado === 'todos' ? null : precioSeleccionado,
-        distritos: distritosSeleccionados.length > 0 ? distritosSeleccionados.join(',') : null,
-        tipos: tiposSeleccionados.length > 0 ? tiposSeleccionados.join(',') : null
+        distritos: distritosSeleccionados.length > 0 ? distritosSeleccionados.join(',') : null
     };
 }
 
@@ -463,14 +620,11 @@ function obtenerFiltrosSeleccionados() {
 function aplicarFiltros() {
     const filtros = obtenerFiltrosSeleccionados();
     
-    // Obtener categoría actual (si estamos en una pestaña)
     const urlParams = new URLSearchParams(window.location.search);
     const categoriaActual = urlParams.get('categoria');
     
-    // Mostrar indicador de carga
     mostrarCargando();
     
-    // Construir URL para petición AJAX
     const params = new URLSearchParams();
     if (categoriaActual) params.append('categoria', categoriaActual);
     if (filtros.precio) params.append('precio', filtros.precio);
@@ -479,7 +633,6 @@ function aplicarFiltros() {
     
     const url = `/Eventos/FiltrarEventosAjax?${params.toString()}`;
     
-    // Hacer petición AJAX
     fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -488,13 +641,8 @@ function aplicarFiltros() {
             return response.text();
         })
         .then(html => {
-            // Actualizar contenido de la página
             actualizarContenido(html);
-            
-            // Cerrar menú después de aplicar filtros
             cerrarMenu();
-            
-            // Ocultar indicador de carga
             ocultarCargando();
         })
         .catch(error => {
@@ -506,20 +654,16 @@ function aplicarFiltros() {
 
 // === FUNCIÓN PARA LIMPIAR TODOS LOS FILTROS ===
 function limpiarFiltros() {
-    // Limpiar radio buttons de precio
     document.querySelector('input[name="precio"][value="todos"]').checked = true;
     
-    // Limpiar checkboxes de distritos
     document.querySelectorAll('#filtroDistritos input[type="checkbox"]').forEach(cb => {
         cb.checked = false;
     });
     
-    // Limpiar checkboxes de tipos
     document.querySelectorAll('#filtroTipos input[type="checkbox"]').forEach(cb => {
         cb.checked = false;
     });
     
-    // Aplicar filtros limpios (mostrar todos)
     aplicarFiltros();
 }
 
@@ -529,7 +673,6 @@ btnLimpiar.addEventListener('click', limpiarFiltros);
 
 // === FUNCIONES AUXILIARES ===
 function mostrarCargando() {
-    // Agregar indicador visual de carga
     const contenido = document.querySelector('.eventos-lista, .eventos-netflix') || 
                      document.querySelector('#contenido-eventos');
     if (contenido) {
@@ -548,26 +691,19 @@ function ocultarCargando() {
 }
 
 function actualizarContenido(html) {
-    // Buscar el contenedor principal de eventos y actualizarlo
-    const contenedorPrincipal = document.querySelector('#contenido-eventos') ||
-                               document.querySelector('.container') ||
-                               document.querySelector('main');
+    const contenedorPrincipal = document.querySelector('#contenido-eventos');
     
     if (contenedorPrincipal) {
-        // Crear un div temporal para parsear el HTML
         const temp = document.createElement('div');
         temp.innerHTML = html;
         
-        // Extraer solo el contenido de eventos
         const nuevoContenido = temp.querySelector('.eventos-lista, .eventos-netflix');
         
         if (nuevoContenido) {
-            // Buscar y reemplazar el contenido existente
             const contenidoExistente = contenedorPrincipal.querySelector('.eventos-lista, .eventos-netflix');
             if (contenidoExistente) {
                 contenidoExistente.replaceWith(nuevoContenido);
             } else {
-                // Si no existe, agregar al final
                 contenedorPrincipal.appendChild(nuevoContenido);
             }
         }
@@ -578,25 +714,40 @@ function actualizarContenido(html) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Sistema de filtros inicializado correctamente');
 });
-// === NUEVA FUNCIÓN: Toggle para filtros colapsibles ===
-function toggleFiltros() {
-    const filtrosContenido = document.getElementById('filtrosContenido');
-    const filtrosToggle = document.getElementById('filtrosToggle');
+
+// Función para abrir/cerrar distritos
+function toggleDistritos() {
+    const content = document.getElementById('distritosContent');
+    const arrow = document.getElementById('distritosArrow');
     
-    // Alternar la clase expandido
-    filtrosContenido.classList.toggle('expandido');
-    filtrosToggle.classList.toggle('rotado');
-    
-    // Cambiar el símbolo de la flecha
-    if (filtrosContenido.classList.contains('expandido')) {
-        filtrosToggle.textContent = '▲';
-    } else {
-        filtrosToggle.textContent = '▼';
-    }
+    content.classList.toggle('expandido');
+    arrow.classList.toggle('rotado');
 }
 
-// === INICIALIZACIÓN ===
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Sistema de filtros inicializado correctamente');
-});
+// Función para abrir/cerrar categorías
+function toggleCategorias() {
+    const content = document.getElementById('categoriasContent');
+    const arrow = document.getElementById('categoriasArrow');
+    
+    content.classList.toggle('expandido');
+    arrow.classList.toggle('rotado');
+}
+
+// Función para abrir/cerrar precios
+function togglePrecios() {
+    const content = document.getElementById('preciosContent');
+    const arrow = document.getElementById('preciosArrow');
+    
+    content.classList.toggle('expandido');
+    arrow.classList.toggle('rotado');
+}
+
+// Función para abrir/cerrar fechas
+function toggleFechas() {
+    const content = document.getElementById('fechasContent');
+    const arrow = document.getElementById('fechasArrow');
+    
+    content.classList.toggle('expandido');
+    arrow.classList.toggle('rotado');
+}
 </script>

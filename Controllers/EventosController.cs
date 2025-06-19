@@ -4,132 +4,168 @@ using EnEscenaMadrid.Models;
 
 namespace EnEscenaMadrid.Controllers
 {
+    /// <summary>
+    /// Controlador principal para gestionar eventos culturales de Madrid
+    /// Maneja la obtención de datos desde la API externa, filtrado y presentación
+    /// </summary>
     public class EventosController : Controller
     {
-        // HttpClient para hacer peticiones HTTP a APIs externas
+        #region Propiedades y Constructor
+
+        // HttpClient para realizar peticiones HTTP a APIs externas
         private readonly HttpClient _httpClient;
 
-        // Configuration para leer datos del appsettings.json
+        // Configuration para leer configuraciones del appsettings.json
         private readonly IConfiguration _configuration;
 
-        // Constructor: C# inyecta automáticamente estas dependencias
+        /// <summary>
+        /// Constructor: ASP.NET Core inyecta automáticamente las dependencias
+        /// </summary>
+        /// <param name="httpClient">Cliente HTTP para llamadas a APIs</param>
+        /// <param name="configuration">Configuración de la aplicación</param>
         public EventosController(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
             _configuration = configuration;
         }
 
-        // Página principal de eventos - muestra todas las categorías
+        #endregion
+
+        #region Métodos Públicos (Actions)
+
+        /// <summary>
+        /// Página principal de eventos - Punto de entrada principal
+        /// Maneja diferentes vistas: Netflix (landing), Categorías específicas, Todos los eventos
+        /// </summary>
+        /// <param name="categoria">Categoría específica a mostrar (teatro, música, etc.)</param>
+        /// <param name="precio">Filtro de precio (gratuito, pago, todos)</param>
+        /// <param name="distritos">Lista de distritos separados por comas</param>
+        /// <param name="tipos">Lista de tipos de eventos separados por comas</param>
+        /// <param name="mostrarTodos">Si true, muestra todos los eventos sin filtro temporal</param>
+        /// <returns>Vista con los eventos filtrados</returns>
         public async Task<IActionResult> Index(
             string? categoria = null,
             string? precio = null,
             string? distritos = null,
             string? tipos = null,
-            bool mostrarTodos = false
-        )
+            bool mostrarTodos = false)
         {
             try
             {
-                // 1. Obtener todos los eventos de la API de Madrid
+                // PASO 1: Obtener eventos de la API externa de Madrid
                 var eventosResponse = await ObtenerEventosDeMadrid();
-
-                // 2. Convertir XML a lista de eventos procesados
                 var eventosProcesados = ProcesarEventos(eventosResponse);
-                // CONVERSIÓN DE PARÁMETROS DE FILTRADO
-                // Los filtros llegan como strings separados por comas desde el frontend
-                // Ejemplo: distritos = "Centro,Chamberí,Salamanca"
-                // Los convertimos a listas para usar en nuestros métodos de filtrado
 
-                List<string>? distritosLista = null;
-                List<string>? tiposLista = null;
+                // PASO 2: Convertir parámetros de string a listas
+                var distritosLista = ConvertirStringALista(distritos);
+                var tiposLista = ConvertirStringALista(tipos);
 
-                // Convertir distritos: "Centro,Chamberí" → ["Centro", "Chamberí"]
-                if (!string.IsNullOrEmpty(distritos))
-                {
-                    distritosLista = distritos
-                        .Split(',')                    // Separar por comas
-                        .Select(d => d.Trim())         // Quitar espacios extras
-                        .Where(d => !string.IsNullOrEmpty(d))  // Quitar elementos vacíos
-                        .ToList();
-                }
-
-                // Convertir tipos: igual proceso para tipos de eventos
-                if (!string.IsNullOrEmpty(tipos))
-                {
-                    tiposLista = tipos
-                        .Split(',')
-                        .Select(t => t.Trim())
-                        .Where(t => !string.IsNullOrEmpty(t))
-                        .ToList();
-                }
-                // 3. Aplicar filtros según el contexto
+                // PASO 3: Aplicar filtros según el contexto de la petición
                 if (!string.IsNullOrEmpty(categoria))
                 {
-                    // PESTAÑAS: Mostrar todos los eventos de la categoría específica
+                    // CONTEXTO: Pestaña específica (Teatro, Música, etc.)
                     eventosProcesados = FiltrarPorCategoria(eventosProcesados, categoria);
-                    eventosProcesados = AplicarFiltros(eventosProcesados, precio, distritosLista, null);
+                    eventosProcesados = AplicarFiltros(eventosProcesados, precio, distritosLista);
                     
-                    ViewBag.CategoriaActual = categoria;
-                    ViewBag.TipoVista = "Categoría";
+                    ConfigurarViewBagParaCategoria(categoria, eventosProcesados.Count);
                 }
                 else if (mostrarTodos)
                 {
-                    // TODOS LOS EVENTOS: Mostrar lista completa sin agrupación temporal
+                    // CONTEXTO: Todos los eventos sin límite temporal
                     eventosProcesados = AplicarFiltros(eventosProcesados, precio, distritosLista, tiposLista);
                     
-                    ViewBag.CategoriaActual = "Todos los eventos";
-                    ViewBag.TipoVista = "TodosEventos";
+                    ConfigurarViewBagParaTodos(eventosProcesados.Count);
                 }
                 else
                 {
-                    // LANDING NETFLIX: Agrupar por categorías (próximos 7 días)
+                    // CONTEXTO: Landing Netflix (próximos 7 días agrupados)
                     var eventosProximos = FiltrarProximosSieteDias(eventosProcesados);
                     var eventosFiltrados = AplicarFiltros(eventosProximos, precio, distritosLista, tiposLista);
                     var eventosPorCategoria = AgruparEventosFiltrados(eventosFiltrados);
                     
-                    ViewBag.EventosPorCategoria = eventosPorCategoria;
-                    ViewBag.CategoriaActual = "Esta semana por categorías";
-                    ViewBag.TipoVista = "Netflix";
-                    
-                    // Para mantener compatibilidad, enviamos lista vacía
-                    eventosProcesados = new List<Evento>();
+                    ConfigurarViewBagParaNetflix(eventosPorCategoria);
+                    eventosProcesados = new List<Evento>(); // Netflix no usa lista directa
                 }
 
-                // 4. Pasar datos a la vista
-                ViewBag.TotalEventos = eventosProcesados.Count;
                 return View(eventosProcesados);
             }
             catch (Exception ex)
             {
-                // Si algo falla, mostramos el error en la vista
-                ViewBag.Error = $"Error al obtener eventos de Madrid: {ex.Message}";
-                return View(new List<Evento>());
+                // Manejo de errores: mostrar mensaje amigable al usuario
+                return ManejarError(ex.Message);
             }
         }
 
-        // Obtener eventos por categoría específica (para navegación por pestañas)
+        /// <summary>
+        /// Endpoint AJAX para filtros dinámicos sin recarga de página
+        /// Usado por el menú lateral de filtros para actualizar contenido
+        /// </summary>
+        /// <param name="fecha">Filtro temporal: hoy, semana, todos</param>
+        /// <param name="categorias">Lista de categorías separadas por comas</param>
+        /// <param name="precio">Filtro de precio</param>
+        /// <param name="distritos">Lista de distritos separados por comas</param>
+        /// <returns>Vista parcial con eventos filtrados</returns>
+        [HttpGet]
+        public async Task<IActionResult> FiltrarEventosAjax(
+            string? fecha = null,
+            string? categorias = null,
+            string? precio = null,
+            string? distritos = null)
+        {
+            try
+            {
+                // PASO 1: Obtener y procesar eventos base
+                var eventosResponse = await ObtenerEventosDeMadrid();
+                var eventosProcesados = ProcesarEventos(eventosResponse);
+                
+                // PASO 2: Convertir parámetros string a listas
+                var distritosLista = ConvertirStringALista(distritos);
+                var categoriasLista = ConvertirStringALista(categorias);
+
+                // PASO 3: Aplicar filtros según fecha seleccionada
+                eventosProcesados = AplicarFiltroTemporal(eventosProcesados, fecha);
+                eventosProcesados = AplicarFiltros(eventosProcesados, precio, distritosLista, categoriasLista);
+
+                // PASO 4: Configurar ViewBag y devolver vista parcial
+                ConfigurarViewBagParaAjax(fecha, eventosProcesados.Count);
+                return PartialView("_EventosLista", eventosProcesados);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Redirección legacy para navegación por categorías
+        /// </summary>
         public async Task<IActionResult> Categoria(string categoria)
         {
-            // Redirigir al Index con parámetro de categoría
             return RedirectToAction("Index", new { categoria = categoria });
         }
 
-        // MÉTODOS PRIVADOS - Lógica de procesamiento
+        #endregion
 
-        // Obtiene y deserializa los eventos de la API de Madrid
+        #region Métodos de Obtención y Procesamiento de Datos
+
+        /// <summary>
+        /// Obtiene eventos desde la API externa de Datos Abiertos de Madrid
+        /// </summary>
+        /// <returns>Respuesta deserializada del XML de Madrid</returns>
         private async Task<MadridEventosResponse> ObtenerEventosDeMadrid()
         {
-            // Leer URL de la API desde configuración
-            var apiUrl = _configuration["MadridApi:EventosUrl"];
+            var apiUrl = _configuration["MadridApi:EventosUrl"] 
+                ?? throw new InvalidOperationException("URL de API no configurada");
 
-            // Hacer petición HTTP a la API
             var xmlResponse = await _httpClient.GetStringAsync(apiUrl);
-
-            // Convertir XML a objetos C#
             return DeserializarXml(xmlResponse);
         }
 
-        // Convierte el XML de Madrid en objetos C# usando XmlSerializer
+        /// <summary>
+        /// Convierte el XML de la API de Madrid en objetos C#
+        /// </summary>
+        /// <param name="xmlContent">Contenido XML crudo</param>
+        /// <returns>Objeto MadridEventosResponse deserializado</returns>
         private MadridEventosResponse DeserializarXml(string xmlContent)
         {
             var serializer = new XmlSerializer(typeof(MadridEventosResponse));
@@ -137,11 +173,17 @@ namespace EnEscenaMadrid.Controllers
             return (MadridEventosResponse)serializer.Deserialize(reader)!;
         }
 
-        // Convierte los datos XML en objetos Evento más fáciles de manejar
+        /// <summary>
+        /// Procesa la respuesta XML y convierte en lista de eventos utilizables
+        /// Filtra eventos válidos y los ordena por fecha
+        /// </summary>
+        /// <param name="response">Respuesta de la API de Madrid</param>
+        /// <returns>Lista de eventos procesados y ordenados</returns>
         private List<Evento> ProcesarEventos(MadridEventosResponse response)
         {
             var eventos = new List<Evento>();
 
+            // Procesar cada elemento del XML
             foreach (var contenido in response.Contenidos)
             {
                 if (contenido.Atributos?.ListaAtributos == null) continue;
@@ -156,20 +198,24 @@ namespace EnEscenaMadrid.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Log error pero continúa procesando otros eventos
+                    // Log del error pero continúa procesando otros eventos
                     Console.WriteLine($"Error procesando evento: {ex.Message}");
                 }
             }
 
-            // Filtrar solo categorías que nos interesan y ordenar por fecha
+            // Filtrar solo categorías válidas y ordenar por fecha
             var eventosFiltrados = FiltrarSoloCategoriasValidas(eventos);
             return eventosFiltrados.OrderBy(e => e.FechaEvento).ToList();
         }
 
-        // Extrae los datos importantes de un evento individual
+        /// <summary>
+        /// Extrae y procesa los datos de un evento individual desde el XML
+        /// </summary>
+        /// <param name="atributos">Lista de atributos del evento en XML</param>
+        /// <returns>Objeto Evento procesado o null si no es válido</returns>
         private Evento? ExtraerDatosEvento(List<EventoAtributo> atributos)
         {
-            // Buscar atributos principales
+            // Extraer atributos básicos del evento
             var id = BuscarAtributo(atributos, "ID-EVENTO");
             var titulo = BuscarAtributo(atributos, "TITULO");
             var tipo = BuscarAtributo(atributos, "TIPO");
@@ -178,19 +224,21 @@ namespace EnEscenaMadrid.Controllers
             var gratuitoStr = BuscarAtributo(atributos, "GRATUITO");
             var contentUrl = BuscarAtributo(atributos, "CONTENT-URL");
             var descripcion = BuscarAtributo(atributos, "DESCRIPCION");
-            // === EXTRAER DATOS DE PRECIO Y DURACIÓN ===
+
+            // Extraer datos adicionales
             var precio = BuscarAtributo(atributos, "PRECIO");
             var eventoLargaDuracionStr = BuscarAtributo(atributos, "EVENTO-LARGA-DURACION");
             var diasSemana = BuscarAtributo(atributos, "DIAS-SEMANA");
             var fechaFinStr = BuscarAtributo(atributos, "FECHA-FIN-EVENTO");
-            // Validar datos mínimos requeridos
+
+            // Validación de datos mínimos requeridos
             if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(titulo) || string.IsNullOrEmpty(fechaStr))
                 return null;
 
-            // Procesar ubicación (atributo anidado)
+            // Procesar ubicación
             var ubicacion = ExtraerUbicacion(atributos);
 
-            // Crear objeto Evento
+            // Crear y configurar objeto Evento
             var evento = new Evento
             {
                 Id = id,
@@ -207,39 +255,79 @@ namespace EnEscenaMadrid.Controllers
                 Longitud = ubicacion.Longitud
             };
 
-            // Convertir fecha
-            if (DateTime.TryParse(fechaStr, out DateTime fecha))
-            {
-                evento.FechaEvento = fecha;
-            }
-            else
-            {
-                return null; // Si no podemos parsear la fecha, descartar evento
-            }
-            // === PROCESAR NUEVOS CAMPOS ===
-
-            // 1. Procesar precio y necesidad de entrada
-            evento.Precio = precio ?? (evento.EsGratuito ? "Gratuito" : "Consultar precio");
-            evento.NecesitaEntrada = !evento.EsGratuito || 
-                (precio?.Contains("descarga", StringComparison.OrdinalIgnoreCase) ?? false);
-
-            // 2. Procesar evento de larga duración
-            evento.EsEventoLargaDuracion = eventoLargaDuracionStr == "1";
-            evento.DiasSemana = diasSemana;
-
+            // Procesar fecha del evento
+            if (!DateTime.TryParse(fechaStr, out DateTime fecha))
+                return null;
             
-            // 3. Procesar fecha fin (para eventos largos)
-            if (!string.IsNullOrEmpty(fechaFinStr) && DateTime.TryParse(fechaFinStr, out DateTime fechaFin))
-            {
-                evento.FechaFin = fechaFin;
-            }
+            evento.FechaEvento = fecha;
 
-            // 4. Crear fecha formateada inteligente
-            evento.FechaFormateada = CrearFechaFormateada(evento);
+            // Procesar campos adicionales
+            ProcesarCamposAdicionales(evento, precio, eventoLargaDuracionStr, diasSemana, fechaFinStr);
+
             return evento;
         }
 
-        // NUEVO: Filtro por precio
+        #endregion
+
+        #region Métodos de Filtrado
+
+        /// <summary>
+        /// Aplica filtro temporal según la opción seleccionada
+        /// </summary>
+        /// <param name="eventos">Lista de eventos base</param>
+        /// <param name="filtroFecha">Tipo de filtro: hoy, semana, todos</param>
+        /// <returns>Eventos filtrados por fecha</returns>
+        private List<Evento> AplicarFiltroTemporal(List<Evento> eventos, string? filtroFecha)
+        {
+            return filtroFecha switch
+            {
+                "hoy" => FiltrarEventosHoy(eventos),
+                "semana" => FiltrarProximosSieteDias(eventos),
+                "todos" => eventos, // Sin filtro temporal
+                _ => FiltrarProximosSieteDias(eventos) // Default: esta semana
+            };
+        }
+
+        /// <summary>
+        /// Método maestro que aplica todos los filtros en secuencia
+        /// </summary>
+        /// <param name="eventos">Lista de eventos base</param>
+        /// <param name="filtroPrecio">Filtro de precio opcional</param>
+        /// <param name="distritosSeleccionados">Lista de distritos seleccionados</param>
+        /// <param name="categoriasSeleccionadas">Lista de categorías seleccionadas</param>
+        /// <returns>Lista de eventos filtrados</returns>
+        private List<Evento> AplicarFiltros(
+            List<Evento> eventos, 
+            string? filtroPrecio = null,
+            List<string>? distritosSeleccionados = null, 
+            List<string>? categoriasSeleccionadas = null)
+        {
+            var eventosFiltrados = eventos;
+
+            // Aplicar filtro de distritos
+            if (distritosSeleccionados != null && distritosSeleccionados.Any())
+            {
+                eventosFiltrados = FiltrarPorDistritos(eventosFiltrados, distritosSeleccionados);
+            }
+
+            // Aplicar filtro de categorías
+            if (categoriasSeleccionadas != null && categoriasSeleccionadas.Any())
+            {
+                eventosFiltrados = FiltrarPorMultiplesCategorias(eventosFiltrados, categoriasSeleccionadas);
+            }
+
+            // Aplicar filtro de precio
+            if (!string.IsNullOrEmpty(filtroPrecio))
+            {
+                eventosFiltrados = FiltrarPorPrecio(eventosFiltrados, filtroPrecio);
+            }
+
+            return eventosFiltrados;
+        }
+
+        /// <summary>
+        /// Filtra eventos por precio (gratuito, pago, todos)
+        /// </summary>
         private List<Evento> FiltrarPorPrecio(List<Evento> eventos, string? filtroPrecio)
         {
             if (string.IsNullOrEmpty(filtroPrecio) || filtroPrecio == "todos")
@@ -253,77 +341,39 @@ namespace EnEscenaMadrid.Controllers
             };
         }
 
-        // NUEVO: Filtro por distritos múltiples
+        /// <summary>
+        /// Filtra eventos por múltiples distritos seleccionados
+        /// </summary>
         private List<Evento> FiltrarPorDistritos(List<Evento> eventos, List<string>? distritosSeleccionados)
         {
-            // Si no hay distritos seleccionados, devolver todos
             if (distritosSeleccionados == null || !distritosSeleccionados.Any())
                 return eventos;
                 
-            return eventos.Where(e => distritosSeleccionados.Contains(e.Distrito, StringComparer.OrdinalIgnoreCase)).ToList();
+            return eventos.Where(e => 
+                distritosSeleccionados.Contains(e.Distrito, StringComparer.OrdinalIgnoreCase)
+            ).ToList();
         }
 
-        // NUEVO: Filtro por tipos específicos (solo para landing "Esta semana")
-        private List<Evento> FiltrarPorTipos(List<Evento> eventos, List<string>? tiposSeleccionados)
+        /// <summary>
+        /// Filtra eventos por múltiples categorías seleccionadas
+        /// </summary>
+        private List<Evento> FiltrarPorMultiplesCategorias(List<Evento> eventos, List<string> categoriasSeleccionadas)
         {
-            if (tiposSeleccionados == null || !tiposSeleccionados.Any())
-                return eventos;
-                    return eventos.Where(e => tiposSeleccionados.Contains(e.Tipo, StringComparer.OrdinalIgnoreCase)).ToList();
-        }
-
-        // MAESTRO: Aplica todos los filtros en secuencia
-        private List<Evento> AplicarFiltros(List<Evento> eventos, 
-            string? filtroPrecio = null,
-            List<string>? distritosSeleccionados = null, 
-            List<string>? tiposSeleccionados = null)
-        {
-            var eventosFiltrados = eventos;
-            // Aplicar filtro de distritos
-            if (distritosSeleccionados != null && distritosSeleccionados.Any())
+            var eventosFiltrados = new List<Evento>();
+            
+            foreach (var categoria in categoriasSeleccionadas)
             {
-                eventosFiltrados = FiltrarPorDistritos(eventosFiltrados, distritosSeleccionados);
+                var eventosCategoria = FiltrarPorCategoria(eventos, categoria);
+                eventosFiltrados.AddRange(eventosCategoria);
             }
-            // Aplicar filtro de tipos (solo para landing "Esta semana")
-            // (no se aplica en pestañas de categorías)
-            if (tiposSeleccionados != null && tiposSeleccionados.Any())
-            {
-                eventosFiltrados = FiltrarPorTipos(eventosFiltrados, tiposSeleccionados);
-            }
-            // Aplicar filtro de precio
-            if (!string.IsNullOrEmpty(filtroPrecio))
-            {
-                eventosFiltrados = FiltrarPorPrecio(eventosFiltrados, filtroPrecio);
-            }   
-            return eventosFiltrados;
+            
+            // Eliminar duplicados
+            return eventosFiltrados.Distinct().ToList();
         }
 
-        // Busca un atributo específico por nombre
-        private string? BuscarAtributo(List<EventoAtributo> atributos, string nombre)
-        {
-            return atributos.FirstOrDefault(a => a.Nombre == nombre)?.Valor;
-        }
-
-        // Extrae información de ubicación (atributo anidado LOCALIZACION)
-        private (string Nombre, string Direccion, string Distrito, double? Latitud, double? Longitud) ExtraerUbicacion(List<EventoAtributo> atributos)
-        {
-            var localizacion = atributos.FirstOrDefault(a => a.Nombre == "LOCALIZACION");
-            if (localizacion?.SubAtributos == null)
-                return ("", "", "", null, null);
-
-            var nombre = BuscarAtributo(localizacion.SubAtributos, "NOMBRE-INSTALACION") ?? "";
-            var direccion = BuscarAtributo(localizacion.SubAtributos, "DIRECCION-INSTALACION") ?? "";
-            var distrito = BuscarAtributo(localizacion.SubAtributos, "DISTRITO") ?? "";
-
-            var latStr = BuscarAtributo(localizacion.SubAtributos, "LATITUD");
-            var lonStr = BuscarAtributo(localizacion.SubAtributos, "LONGITUD");
-
-            double? latitud = double.TryParse(latStr, out double lat) ? lat : null;
-            double? longitud = double.TryParse(lonStr, out double lon) ? lon : null;
-
-            return (nombre, direccion, distrito, latitud, longitud);
-        }
-
-        // Filtra eventos por categoría según nuestras pestañas definidas
+        /// <summary>
+        /// Filtra eventos por categoría específica (teatro, música, etc.)
+        /// </summary>
         private List<Evento> FiltrarPorCategoria(List<Evento> eventos, string categoria)
         {
             var tiposFiltro = categoria.ToLower() switch
@@ -372,21 +422,38 @@ namespace EnEscenaMadrid.Controllers
 
             return eventos.Where(e => tiposFiltro.Contains(e.Tipo)).ToList();
         }
-        // Filtra eventos para mostrar solo los próximos 7 días (landing page)
+
+        /// <summary>
+        /// Filtra eventos para mostrar solo los próximos 7 días
+        /// </summary>
         private List<Evento> FiltrarProximosSieteDias(List<Evento> eventos)
         {
             var hoy = DateTime.Today;
             var limiteSemanaSiguiente = hoy.AddDays(7);
             
             return eventos.Where(evento => 
-                // INCLUIR: Eventos con fecha específica en los próximos 7 días
                 !evento.EsEventoLargaDuracion && 
                 evento.FechaEvento.Date >= hoy && 
                 evento.FechaEvento.Date <= limiteSemanaSiguiente
             ).ToList();
         }
-        
-        // Filtra eventos para incluir solo las categorías que nos interesan
+
+        /// <summary>
+        /// Filtra eventos para mostrar solo los de hoy
+        /// </summary>
+        private List<Evento> FiltrarEventosHoy(List<Evento> eventos)
+        {
+            var hoy = DateTime.Today;
+            
+            return eventos.Where(evento => 
+                !evento.EsEventoLargaDuracion && 
+                evento.FechaEvento.Date == hoy
+            ).ToList();
+        }
+
+        /// <summary>
+        /// Filtra eventos para incluir solo las categorías que nos interesan
+        /// </summary>
         private List<Evento> FiltrarSoloCategoriasValidas(List<Evento> eventos)
         {
             var tiposValidos = new[]
@@ -431,71 +498,172 @@ namespace EnEscenaMadrid.Controllers
             return eventos.Where(e => tiposValidos.Contains(e.Tipo)).ToList();
         }
 
-        // NUEVO: Agrupa eventos ya filtrados por categorías (sin aplicar filtro temporal)
-private Dictionary<string, List<Evento>> AgruparEventosFiltrados(List<Evento> eventosFiltrados)
-{
-    var eventosPorCategoria = new Dictionary<string, List<Evento>>();
-    
-    // Definir las mismas categorías que en el método original
-    var categorias = new Dictionary<string, string[]>
-    {
-        ["🎭 TEATRO"] = new[] { 
-            "/contenido/actividades/TeatroPerformance",
-            "/contenido/actividades/TeatroPerformance/MusicalCabaret",
-            "/contenido/actividades/TeatroPerformance/ComediaMonologo",
-            "/contenido/actividades/CircoMagia"
-        },
-        ["🎬 CINE"] = new[] { 
-            "/contenido/actividades/CineActividadesAudiovisuales"
-        },
-        ["🎨 EXPOSICIONES"] = new[] { 
-            "/contenido/actividades/Exposiciones",
-            "/contenido/actividades/ActividadesCalleArteUrbano"
-        },
-        ["📚 LITERATURA"] = new[] { 
-            "/contenido/actividades/RecitalesPresentacionesActosLiterarios",
-            "/contenido/actividades/ClubesLectura"
-        },
-        ["🎵 MÚSICA"] = new[] { 
-            "/contenido/actividades/Musica",
-            "/contenido/actividades/Musica/JazzSoulFunkySwingReagge",
-            "/contenido/actividades/Musica/RockPop",
-            "/contenido/actividades/DanzaBaile",
-            "/contenido/actividades/DanzaBaile/FolcloreEtnica",
-            "/contenido/actividades/DanzaBaile/Flamenco"
-        },
-        ["🎉 FESTIVALES"] = new[] { 
-            "/contenido/actividades/Festivales",
-            "/contenido/actividades/Fiestas",
-            "/contenido/actividades/ProgramacionDestacadaAgendaCultura"
-        }
-    };
-    
-    // Agrupar eventos filtrados por categoría
-    foreach (var categoria in categorias)
-    {
-        var eventosCategoria = eventosFiltrados
-            .Where(e => categoria.Value.Contains(e.Tipo))
-            .Take(10) // Máximo 10 por categoría para mantener diseño Netflix
-            .ToList();
-            
-        // Solo agregar categorías que tengan eventos
-        if (eventosCategoria.Any())
-        {
-            eventosPorCategoria[categoria.Key] = eventosCategoria;
-        }
-    }
-    
-    return eventosPorCategoria;
-}
+        #endregion
 
-        // Crea texto de fecha inteligente según el tipo de evento
+        #region Métodos de Agrupación y Presentación
+
+        /// <summary>
+        /// Agrupa eventos filtrados por categorías para vista Netflix
+        /// </summary>
+        /// <param name="eventosFiltrados">Lista de eventos ya filtrados</param>
+        /// <returns>Diccionario con eventos agrupados por categoría</returns>
+        private Dictionary<string, List<Evento>> AgruparEventosFiltrados(List<Evento> eventosFiltrados)
+        {
+            var eventosPorCategoria = new Dictionary<string, List<Evento>>();
+            
+            var categorias = new Dictionary<string, string[]>
+            {
+                ["🎭 TEATRO"] = new[] { 
+                    "/contenido/actividades/TeatroPerformance",
+                    "/contenido/actividades/TeatroPerformance/MusicalCabaret",
+                    "/contenido/actividades/TeatroPerformance/ComediaMonologo",
+                    "/contenido/actividades/CircoMagia"
+                },
+                ["🎬 CINE"] = new[] { 
+                    "/contenido/actividades/CineActividadesAudiovisuales"
+                },
+                ["🎨 EXPOSICIONES"] = new[] { 
+                    "/contenido/actividades/Exposiciones",
+                    "/contenido/actividades/ActividadesCalleArteUrbano"
+                },
+                ["📚 LITERATURA"] = new[] { 
+                    "/contenido/actividades/RecitalesPresentacionesActosLiterarios",
+                    "/contenido/actividades/ClubesLectura"
+                },
+                ["🎵 MÚSICA"] = new[] { 
+                    "/contenido/actividades/Musica",
+                    "/contenido/actividades/Musica/JazzSoulFunkySwingReagge",
+                    "/contenido/actividades/Musica/RockPop",
+                    "/contenido/actividades/DanzaBaile",
+                    "/contenido/actividades/DanzaBaile/FolcloreEtnica",
+                    "/contenido/actividades/DanzaBaile/Flamenco"
+                },
+                ["🎉 FESTIVALES"] = new[] { 
+                    "/contenido/actividades/Festivales",
+                    "/contenido/actividades/Fiestas",
+                    "/contenido/actividades/ProgramacionDestacadaAgendaCultura"
+                }
+            };
+            
+            // Agrupar eventos filtrados por categoría
+            foreach (var categoria in categorias)
+            {
+                var eventosCategoria = eventosFiltrados
+                    .Where(e => categoria.Value.Contains(e.Tipo))
+                    .Take(10) // Máximo 10 por categoría para diseño Netflix
+                    .ToList();
+                    
+                if (eventosCategoria.Any())
+                {
+                    eventosPorCategoria[categoria.Key] = eventosCategoria;
+                }
+            }
+            
+            return eventosPorCategoria;
+        }
+
+        #endregion
+
+        #region Métodos de Utilidad
+
+        /// <summary>
+        /// Convierte string separado por comas en lista
+        /// </summary>
+        /// <param name="input">String con elementos separados por comas</param>
+        /// <returns>Lista de strings o null si está vacío</returns>
+        private List<string>? ConvertirStringALista(string? input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return null;
+                
+            return input
+                .Split(',')
+                .Select(item => item.Trim())
+                .Where(item => !string.IsNullOrEmpty(item))
+                .ToList();
+        }
+
+        /// <summary>
+        /// Busca un atributo específico por nombre en la lista de atributos XML
+        /// </summary>
+        /// <param name="atributos">Lista de atributos del evento</param>
+        /// <param name="nombre">Nombre del atributo a buscar</param>
+        /// <returns>Valor del atributo o null si no existe</returns>
+        private string? BuscarAtributo(List<EventoAtributo> atributos, string nombre)
+        {
+            return atributos.FirstOrDefault(a => a.Nombre == nombre)?.Valor;
+        }
+
+        /// <summary>
+        /// Extrae información de ubicación del evento (atributo anidado LOCALIZACION)
+        /// </summary>
+        /// <param name="atributos">Lista de atributos del evento</param>
+        /// <returns>Tupla con datos de ubicación</returns>
+        private (string Nombre, string Direccion, string Distrito, double? Latitud, double? Longitud) 
+            ExtraerUbicacion(List<EventoAtributo> atributos)
+        {
+            var localizacion = atributos.FirstOrDefault(a => a.Nombre == "LOCALIZACION");
+            if (localizacion?.SubAtributos == null)
+                return ("", "", "", null, null);
+
+            var nombre = BuscarAtributo(localizacion.SubAtributos, "NOMBRE-INSTALACION") ?? "";
+            var direccion = BuscarAtributo(localizacion.SubAtributos, "DIRECCION-INSTALACION") ?? "";
+            var distrito = BuscarAtributo(localizacion.SubAtributos, "DISTRITO") ?? "";
+
+            var latStr = BuscarAtributo(localizacion.SubAtributos, "LATITUD");
+            var lonStr = BuscarAtributo(localizacion.SubAtributos, "LONGITUD");
+
+            double? latitud = double.TryParse(latStr, out double lat) ? lat : null;
+            double? longitud = double.TryParse(lonStr, out double lon) ? lon : null;
+
+            return (nombre, direccion, distrito, latitud, longitud);
+        }
+
+        /// <summary>
+        /// Procesa campos adicionales del evento (precio, duración, etc.)
+        /// </summary>
+        /// <param name="evento">Evento a modificar</param>
+        /// <param name="precio">Precio del evento</param>
+        /// <param name="eventoLargaDuracionStr">Indicador de evento de larga duración</param>
+        /// <param name="diasSemana">Días de la semana del evento</param>
+        /// <param name="fechaFinStr">Fecha de fin del evento</param>
+        private void ProcesarCamposAdicionales(
+            Evento evento, 
+            string? precio, 
+            string? eventoLargaDuracionStr, 
+            string? diasSemana, 
+            string? fechaFinStr)
+        {
+            // Procesar precio y necesidad de entrada
+            evento.Precio = precio ?? (evento.EsGratuito ? "Gratuito" : "Consultar precio");
+            evento.NecesitaEntrada = !evento.EsGratuito || 
+                (precio?.Contains("descarga", StringComparison.OrdinalIgnoreCase) ?? false);
+
+            // Procesar evento de larga duración
+            evento.EsEventoLargaDuracion = eventoLargaDuracionStr == "1";
+            evento.DiasSemana = diasSemana;
+
+            // Procesar fecha fin para eventos largos
+            if (!string.IsNullOrEmpty(fechaFinStr) && DateTime.TryParse(fechaFinStr, out DateTime fechaFin))
+            {
+                evento.FechaFin = fechaFin;
+            }
+
+            // Crear fecha formateada inteligente
+            evento.FechaFormateada = CrearFechaFormateada(evento);
+        }
+
+        /// <summary>
+        /// Crea texto de fecha inteligente según el tipo de evento
+        /// </summary>
+        /// <param name="evento">Evento a procesar</param>
+        /// <returns>Texto formateado de la fecha</returns>
         private string CrearFechaFormateada(Evento evento)
         {
             var hoy = DateTime.Today;
             var fechaEvento = evento.FechaEvento.Date;
 
-            // CASO 1: Eventos de larga duración (como Matadero para grupos)
+            // Eventos de larga duración
             if (evento.EsEventoLargaDuracion)
             {
                 if (!string.IsNullOrEmpty(evento.DiasSemana))
@@ -511,7 +679,7 @@ private Dictionary<string, List<Evento>> AgruparEventosFiltrados(List<Evento> ev
                 return "📅 Actividad permanente";
             }
 
-            // CASO 2: Eventos con fecha específica
+            // Eventos con fecha específica
             var diferenciaDias = (fechaEvento - hoy).Days;
 
             return diferenciaDias switch
@@ -524,7 +692,11 @@ private Dictionary<string, List<Evento>> AgruparEventosFiltrados(List<Evento> ev
             };
         }
 
-        // Convierte códigos de días a texto legible
+        /// <summary>
+        /// Convierte códigos de días a texto legible
+        /// </summary>
+        /// <param name="diasCodigos">Códigos de días separados por comas (L,M,X,J,V,S,D)</param>
+        /// <returns>Texto legible de los días</returns>
         private string ConvertirDiasSemana(string diasCodigos)
         {
             var dias = diasCodigos.Split(',');
@@ -542,69 +714,75 @@ private Dictionary<string, List<Evento>> AgruparEventosFiltrados(List<Evento> ev
             
             return string.Join(", ", diasTexto);
         }
-   // NUEVO: Método AJAX para filtros (devuelve solo contenido, no layout completo)
-    [HttpGet]
-    public async Task<IActionResult> FiltrarEventosAjax(
-        string? categoria = null,
-        string? precio = null,
-        string? distritos = null,
-        string? tipos = null)
-    {
-        // Reutilizar toda la lógica del Index()
-        // pero devolver solo vista parcial para AJAX
-        
-        try
+
+        #endregion
+
+        #region Métodos de Configuración de ViewBag
+
+        /// <summary>
+        /// Configura ViewBag para vista de categoría específica
+        /// </summary>
+        /// <param name="categoria">Nombre de la categoría</param>
+        /// <param name="totalEventos">Número total de eventos</param>
+        private void ConfigurarViewBagParaCategoria(string categoria, int totalEventos)
         {
-            // Misma lógica que Index() - obtener y procesar eventos
-            var eventosResponse = await ObtenerEventosDeMadrid();
-            var eventosProcesados = ProcesarEventos(eventosResponse);
-            
-            // Misma lógica - convertir parámetros
-            List<string>? distritosLista = null;
-            List<string>? tiposLista = null;
-            
-            if (!string.IsNullOrEmpty(distritos))
-            {
-                distritosLista = distritos.Split(',').Select(d => d.Trim()).Where(d => !string.IsNullOrEmpty(d)).ToList();
-            }
-            
-            if (!string.IsNullOrEmpty(tipos))
-            {
-                tiposLista = tipos.Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrEmpty(t)).ToList();
-            }
-            
-            // Aplicar filtros según contexto (misma lógica que Index)
-            if (!string.IsNullOrEmpty(categoria))
-            {
-                eventosProcesados = FiltrarPorCategoria(eventosProcesados, categoria);
-                eventosProcesados = AplicarFiltros(eventosProcesados, precio, distritosLista, null);
-                
-                ViewBag.CategoriaActual = categoria;
-                ViewBag.TipoVista = "Categoría";
-                ViewBag.TotalEventos = eventosProcesados.Count;
-                
-                // DIFERENCIA: Devolver vista parcial para AJAX
-                return PartialView("_EventosLista", eventosProcesados);
-            }
-            else
-            {
-                var eventosProximos = FiltrarProximosSieteDias(eventosProcesados);
-                var eventosFiltrados = AplicarFiltros(eventosProximos, precio, distritosLista, tiposLista);
-                var eventosPorCategoria = AgruparEventosFiltrados(eventosFiltrados);
-                
-                ViewBag.EventosPorCategoria = eventosPorCategoria;
-                ViewBag.CategoriaActual = "Esta semana por categorías";
-                ViewBag.TipoVista = "Netflix";
-                
-                // DIFERENCIA: Devolver vista parcial para AJAX
-                return PartialView("_EventosNetflix", eventosPorCategoria);
-            }
+            ViewBag.CategoriaActual = categoria;
+            ViewBag.TipoVista = "Categoría";
+            ViewBag.TotalEventos = totalEventos;
         }
-        catch (Exception ex)
+
+        /// <summary>
+        /// Configura ViewBag para vista de todos los eventos
+        /// </summary>
+        /// <param name="totalEventos">Número total de eventos</param>
+        private void ConfigurarViewBagParaTodos(int totalEventos)
         {
-            return Json(new { error = ex.Message });
+            ViewBag.CategoriaActual = "Todos los eventos";
+            ViewBag.TipoVista = "TodosEventos";
+            ViewBag.TotalEventos = totalEventos;
         }
+
+        /// <summary>
+        /// Configura ViewBag para vista Netflix (landing)
+        /// </summary>
+        /// <param name="eventosPorCategoria">Eventos agrupados por categoría</param>
+        private void ConfigurarViewBagParaNetflix(Dictionary<string, List<Evento>> eventosPorCategoria)
+        {
+            ViewBag.EventosPorCategoria = eventosPorCategoria;
+            ViewBag.CategoriaActual = "Esta semana por categorías";
+            ViewBag.TipoVista = "Netflix";
+            ViewBag.TotalEventos = 0; // Netflix no muestra total
+        }
+
+        /// <summary>
+        /// Configura ViewBag para respuestas AJAX
+        /// </summary>
+        /// <param name="fecha">Filtro de fecha aplicado</param>
+        /// <param name="totalEventos">Número total de eventos</param>
+        private void ConfigurarViewBagParaAjax(string? fecha, int totalEventos)
+        {
+            ViewBag.CategoriaActual = fecha switch
+            {
+                "hoy" => "Eventos de hoy",
+                "semana" => "Esta semana",
+                "todos" => "Todos los eventos",
+                _ => "Esta semana"
+            };
+            ViewBag.TipoVista = "Categoría";
+            ViewBag.TotalEventos = totalEventos;
+        }
+
+        /// <summary>
+        /// Maneja errores y devuelve vista con mensaje de error
+        /// </summary>
+        /// <param name="mensajeError">Mensaje de error a mostrar</param>
+        /// <returns>Vista con lista vacía y mensaje de error</returns>
+        private IActionResult ManejarError(string mensajeError)
+        {
+            ViewBag.Error = $"Error al obtener eventos de Madrid: {mensajeError}";
+            return View(new List<Evento>());
+        }
+
+        #endregion
     }
-        }
-}// Fin del controlador EventosController.cs
-// Este controlador maneja la lógica de negocio para obtener, filtrar y procesar eventos en Madrid.     
+}

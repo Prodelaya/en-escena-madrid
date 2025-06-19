@@ -30,3 +30,88 @@ body {
   font-family: Arial, sans-serif;
   background-color: var(--dorado-suave);
 }
+/* HEADER FIJO */
+.app-header-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: white;
+    border-bottom: 2px solid var(--teatro-rojo);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.app-title {
+    color: var(--teatro-rojo);
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* SECCIÓN USUARIO */
+.user-section {
+    display: flex;
+    align-items: center;
+}
+
+.user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--teatro-rojo);
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.user-btn:hover {
+    background: #a91717;
+    transform: translateY(-1px);
+}
+
+/* BOTÓN FILTROS QUE SE MUEVE */
+.btn-filtros-hamburguesa {
+    position: absolute; /* Cambiado de fixed a absolute */
+    top: 80px; /* Debajo del header */
+    left: 20px;
+    background: var(--teatro-rojo);
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+    transition: all 0.3s ease;
+    z-index: 998;
+}
+
+.btn-filtros-hamburguesa:hover {
+    background: #a91717;
+    transform: scale(1.05);
+}
+
+/* ESPACIADO PARA HEADER FIJO */
+body {
+    padding-top: 80px; /* Espacio para header fijo */
+}
+
+.container {
+    padding-top: 60px; /* Espacio adicional para botón filtros */
+}
